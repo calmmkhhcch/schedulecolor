@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>班表查詢工具</title>
+    <title>班表小助手</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <!-- 引入 html2canvas 用於圖片下載 -->
@@ -14,41 +14,19 @@
             font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
             padding-top: 20px;
             padding-bottom: 50px;
-            -webkit-touch-callout: none; /* 防止長按選取文字 */
-            -webkit-user-select: none; /* Safari */
-            -moz-user-select: none; /* Firefox */
-            -ms-user-select: none; /* IE10+/Edge */
-            user-select: none; /* Standard */
-        }
-        
-        /* 允許輸入框可以選取文字 */
-        input, textarea, select {
-            -webkit-user-select: text !important;
-            -moz-user-select: text !important;
-            -ms-user-select: text !important;
-            user-select: text !important;
-        }
-        
-        .container {
-            max-width: 1200px;
-            background-color: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(67, 97, 238, 0.1);
-            margin-top: 20px;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
         
         .card {
-            border: none;
             border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
             margin-bottom: 25px;
             overflow: hidden;
-            transition: transform 0.3s;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
         }
         
         .card-title {
@@ -56,31 +34,25 @@
             font-weight: 600;
         }
         
-        /* 上傳區域樣式 */
         .upload-area {
             text-align: center;
             padding: 40px 20px;
-            border: 3px dashed #4361ee;
-            border-radius: 15px;
-            background-color: rgba(67, 97, 238, 0.03);
-            transition: all 0.3s;
+            border: 2px dashed #4361ee;
+            border-radius: 12px;
+            background-color: #f8faff;
             cursor: pointer;
-            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            position: relative;
         }
         
         .upload-area:hover {
-            background-color: rgba(67, 97, 238, 0.08);
+            background-color: #edf2ff;
             border-color: #3a56d4;
         }
         
         .upload-instruction {
             color: #333;
-            margin-bottom: 15px;
-        }
-        
-        .upload-instruction .blue-text {
-            color: #4361ee;
-            font-weight: bold;
+            margin-bottom: 10px;
         }
         
         .upload-btn-container {
@@ -92,217 +64,223 @@
         }
         
         #selectFileBtn {
+            background-color: #4361ee;
+            border-color: #4361ee;
             padding: 12px 30px;
-            font-size: 1.2rem;
-            background-color: white;
-            color: #4361ee;
-            border: 2px solid #4361ee;
+            font-size: 1.1rem;
             border-radius: 10px;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
         }
         
         #selectFileBtn:hover {
-            background-color: #4361ee;
-            color: white;
-            transform: translateY(-3px);
+            background-color: #3a56d4;
+            border-color: #3a56d4;
+            transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
         }
         
+        /* 修改按鈕文字為黑色粗體 */
+        .file-btn-text {
+            color: #000000 !important; /* 黑色 */
+            font-weight: 700 !important; /* 粗體 */
+        }
+        
         .file-info {
-            background-color: rgba(67, 97, 238, 0.1);
-            padding: 15px;
-            border-radius: 10px;
-            border-left: 4px solid #4361ee;
+            background-color: #e8f5e8;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
         .error-message {
-            background-color: rgba(220, 53, 69, 0.1);
+            background-color: #ffe6e6;
             color: #dc3545;
-            padding: 15px;
-            border-radius: 10px;
+            padding: 10px 15px;
+            border-radius: 8px;
             border-left: 4px solid #dc3545;
-            margin-top: 20px;
+            margin-top: 15px;
         }
         
-        /* 載入動畫 */
         .loading-spinner {
-            text-align: center;
-            padding: 50px 20px;
             display: none;
+            text-align: center;
+            padding: 40px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin: 20px 0;
         }
         
         .result-section {
             display: none;
         }
         
-        /* 人員選擇器 */
         .person-selector {
-            margin-bottom: 25px;
-        }
-        
-        /* 人員查詢結果 */
-        .person-schedule-header {
-            background-color: rgba(67, 97, 238, 0.1);
-            padding: 20px;
-            border-bottom: 1px solid rgba(67, 97, 238, 0.2);
-        }
-        
-        .person-schedule-header h4 {
-            color: #4361ee;
-        }
-        
-        .person-info-card {
-            background-color: rgba(67, 97, 238, 0.05);
-            padding: 20px;
+            background-color: white;
+            padding: 25px;
             border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
             margin-bottom: 25px;
-            border: 1px solid rgba(67, 97, 238, 0.2);
         }
         
-        /* 週曆樣式 */
+        .person-selector select {
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            padding: 12px 20px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .person-selector select:focus {
+            border-color: #4361ee;
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+        }
+        
+        .reupload-btn {
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 500;
+        }
+        
+        /* 人員資訊卡片 */
+        .person-info-card {
+            background-color: #f8faff;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 5px solid #4361ee;
+            margin-bottom: 25px;
+        }
+        
+        /* 週曆樣式 - 改為表格格式 */
         .weekly-calendar {
-            margin-bottom: 30px;
+            background-color: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+        
+        .weekly-calendar-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed; /* 固定表格佈局 */
         }
         
         .weekly-calendar-header {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
-            margin-bottom: 10px;
+            background-color: #4361ee;
+            color: white;
+            font-weight: 600;
             text-align: center;
         }
         
         .weekday-header {
-            padding: 10px;
-            background-color: rgba(67, 97, 238, 0.1);
-            border-radius: 8px;
-            font-weight: bold;
-            color: #4361ee;
-            min-height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            padding: 15px 5px;
+            border-right: 1px solid rgba(255,255,255,0.2);
+            width: 14.2857%; /* 100% / 7 = 14.2857% */
+        }
+        
+        .weekday-header:last-child {
+            border-right: none;
         }
         
         .weekday-header.weekend {
-            background-color: rgba(255, 107, 107, 0.1);
-            color: #ff6b6b;
+            background-color: #3a56d4;
         }
         
         .weekly-calendar-body {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            padding: 0;
         }
         
-        .week-row {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
+        .calendar-row {
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calendar-row:last-child {
+            border-bottom: none;
         }
         
         .day-cell {
-            padding: 12px 8px;
-            border-radius: 8px;
             background-color: #f8f9fa;
-            min-height: 120px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
+            padding: 10px 5px;
+            height: 120px; /* 固定高度 */
+            width: 14.2857%; /* 固定寬度：100% / 7 */
+            vertical-align: top;
             position: relative;
-            box-sizing: border-box;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            text-align: center;
+            border-right: 1px solid #eaeaea;
+            overflow: hidden; /* 隱藏超出內容 */
+            box-sizing: border-box; /* 確保padding不會增加總寬度 */
         }
         
-        .day-cell.weekend {
-            background-color: rgba(255, 107, 107, 0.05);
+        .day-cell:last-child {
+            border-right: none;
+        }
+        
+        .day-cell:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 1;
+            position: relative;
         }
         
         .day-cell.today {
-            border: 3px solid #ff6b6b;
-            box-shadow: 0 0 10px rgba(255, 107, 107, 0.3);
-            animation: pulse 2s infinite;
+            border-color: #ff6b6b;
+            background-color: #fff5f5;
         }
         
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(255, 107, 107, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
+        .day-cell.weekend {
+            background-color: #f8f9ff;
+        }
+        
+        .day-cell.empty {
+            background-color: #f8f9fa;
         }
         
         .day-date {
-            font-weight: bold;
-            color: #4361ee;
-            margin-bottom: 8px;
-            font-size: 1.2rem;
-            width: 100%;
-            text-align: center;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+            line-height: 1.2;
         }
         
         .day-shift {
             font-size: 1.1rem;
-            font-weight: bold;
+            font-weight: 600;
+            color: #4361ee;
             margin-bottom: 5px;
-            padding: 5px 10px;
-            border-radius: 6px;
-            text-align: center;
-            width: 100%;
-            min-height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-sizing: border-box;
-            /* 修改文字顏色為黑色粗體 */
-            color: #000000 !important;
-            font-weight: 700 !important;
-        }
-        
-        .day-shift.regular {
-            background-color: rgba(26, 147, 111, 0.2);
-            /* 文字顏色已在.day-shift中統一設定 */
-        }
-        
-        .day-shift.holiday {
-            background-color: rgba(255, 107, 107, 0.2);
-            /* 文字顏色已在.day-shift中統一設定 */
-        }
-        
-        .day-shift.special {
-            background-color: rgba(114, 9, 183, 0.2);
-            /* 文字顏色已在.day-shift中統一設定 */
-        }
-        
-        .day-shift.random {
-            background-color: rgba(108, 117, 125, 0.2);
-            /* 文字顏色已在.day-shift中統一設定 */
+            line-height: 1.2;
+            word-break: break-word; /* 允許換行 */
+            overflow-wrap: break-word; /* 允許換行 */
         }
         
         .day-shift-time {
             font-size: 0.8rem;
             color: #666;
-            text-align: center;
-            width: 100%;
-            min-height: 20px;
-            /* 修改文字顏色為黑色粗體 */
-            color: #000000 !important;
-            font-weight: 600 !important;
+            margin-top: auto;
+            line-height: 1.2;
+            word-break: break-word; /* 允許換行 */
+            overflow-wrap: break-word; /* 允許換行 */
         }
         
         .day-empty {
-            color: #aaa;
+            color: #999;
             font-style: italic;
             margin-top: 20px;
-            text-align: center;
-            width: 100%;
         }
         
-        /* 班表統計 - 折疊樣式 */
+        /* 班表統計 */
         .shift-summary-section {
-            background-color: #f8f9fa;
-            padding: 20px;
+            background-color: white;
             border-radius: 15px;
-            border: 1px solid rgba(67, 97, 238, 0.2);
-            margin-bottom: 20px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
         }
         
         .summary-header {
@@ -310,37 +288,35 @@
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
         
         .summary-title {
-            font-size: 1.2rem;
-            font-weight: bold;
             color: #4361ee;
-            display: flex;
-            align-items: center;
+            font-weight: 600;
             margin: 0;
-        }
-        
-        .summary-title i {
-            margin-right: 10px;
         }
         
         .summary-toggle {
             background: none;
             border: none;
-            color: #4361ee;
             font-size: 1.2rem;
-            transition: transform 0.3s;
+            color: #4361ee;
+            transition: transform 0.3s ease;
         }
         
-        .summary-toggle.collapsed .bi-chevron-down {
-            transform: rotate(-90deg);
+        .summary-toggle.collapsed i {
+            transform: rotate(0deg);
+        }
+        
+        .summary-toggle:not(.collapsed) i {
+            transform: rotate(180deg);
         }
         
         .summary-content {
+            max-height: 500px;
+            overflow-y: auto;
             transition: max-height 0.3s ease;
-            overflow: hidden;
         }
         
         .summary-content.collapsed {
@@ -348,155 +324,75 @@
             overflow: hidden;
         }
         
-        .summary-content.expanded {
-            max-height: 1000px;
-        }
-        
         .summary-item {
             display: flex;
             justify-content: space-between;
-            padding: 10px 15px;
+            align-items: center;
+            padding: 12px 15px;
             margin-bottom: 8px;
-            background-color: white;
+            background-color: #f8f9fa;
             border-radius: 8px;
             border-left: 4px solid #4361ee;
+            transition: all 0.3s ease;
+        }
+        
+        .summary-item:hover {
+            background-color: #edf2ff;
+            transform: translateX(5px);
         }
         
         .summary-shift {
-            font-weight: bold;
+            font-weight: 600;
             color: #333;
         }
         
         .summary-count {
             color: #4361ee;
-            font-weight: bold;
-        }
-        
-        /* 功能按鈕區 */
-        .action-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(0, 0, 0, 0.1);
-        }
-        
-        .action-btn {
-            padding: 12px 25px;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border-radius: 10px;
-            transition: all 0.3s;
-        }
-        
-        .action-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            font-weight: 600;
         }
         
         /* 顏色設定區域 */
         .color-settings-section {
-            background-color: #f8f9fa;
-            padding: 20px;
+            background-color: white;
             border-radius: 15px;
-            border: 1px solid rgba(67, 97, 238, 0.2);
-            margin-bottom: 20px;
-            max-height: 500px;
-            overflow-y: auto;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
         }
         
         .color-setting-item {
             display: flex;
             align-items: center;
-            margin-bottom: 12px;
-            padding: 10px;
-            background-color: white;
+            gap: 15px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            background-color: #f8f9fa;
             border-radius: 8px;
-            border: 1px solid #e9ecef;
-            position: relative;
+            border-left: 4px solid #4361ee;
+        }
+        
+        .shift-label {
+            min-width: 40px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .time-label {
+            flex: 1;
+            color: #666;
+            font-size: 0.9rem;
         }
         
         .color-preview {
             width: 40px;
             height: 40px;
             border-radius: 6px;
-            margin-right: 15px;
-            border: 1px solid #dee2e6;
-            transition: background-color 0.3s;
+            border: 2px solid #ddd;
             cursor: pointer;
-            position: relative;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        .color-preview:hover {
-            transform: scale(1.05);
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-        }
-        
-        /* 快速顏色選擇面板 - 類似 Excel 樣式 */
-        .color-quick-panel {
-            position: fixed;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.25);
-            padding: 15px;
-            z-index: 10000;
-            display: none;
-            min-width: 320px;
-            border: 1px solid #dee2e6;
-            max-height: 500px;
-            overflow-y: auto;
-        }
-        
-        .color-quick-panel.show {
-            display: block;
-        }
-        
-        .color-quick-panel-title {
-            font-size: 0.9rem;
-            color: #333;
-            margin-bottom: 12px;
-            text-align: left;
-            font-weight: bold;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .quick-colors-grid {
-            display: grid;
-            grid-template-columns: repeat(10, 1fr);
-            gap: 4px;
-            margin-bottom: 15px;
-        }
-        
-        .quick-color-item {
-            width: 22px;
-            height: 22px;
-            border-radius: 3px;
-            border: 1px solid #e0e0e0;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-sizing: border-box;
-        }
-        
-        .quick-color-item:hover {
-            transform: scale(1.15);
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-            border-color: #999;
-            z-index: 1;
-            position: relative;
         }
         
         .color-input-group {
             display: flex;
-            align-items: center;
             gap: 10px;
         }
         
@@ -504,75 +400,47 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            gap: 5px;
         }
         
         .color-input-label {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #666;
-            min-width: 25px;
-            margin-bottom: 3px;
-        }
-        
-        .color-input-with-buttons {
-            display: flex;
-            flex-direction: column;
+            font-weight: 600;
         }
         
         .color-input {
             width: 70px;
             text-align: center;
+            border-radius: 6px;
+            border: 1px solid #ddd;
         }
         
-        .color-buttons {
+        /* 功能按鈕區 */
+        .action-buttons {
             display: flex;
-            justify-content: space-between;
-            margin-top: 2px;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
         }
         
-        .color-btn {
-            width: 22px;
-            height: 18px;
-            padding: 0;
-            font-size: 0.7rem;
+        .action-btn {
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: 600;
             display: flex;
             align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
+            gap: 8px;
+            transition: all 0.3s ease;
         }
         
-        .color-btn:active {
-            background-color: #4361ee;
-            color: white;
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(0,0,0,0.15);
         }
         
-        .color-btn-up {
-            border-radius: 3px 3px 0 0;
-        }
-        
-        .color-btn-down {
-            border-radius: 0 0 3px 3px;
-        }
-        
-        .shift-label {
-            min-width: 100px;
-            font-weight: bold;
-            color: #333;
-        }
-        
-        .time-label {
-            min-width: 150px;
-            color: #666;
-            font-size: 0.9rem;
-        }
-        
-        /* 複製通知 */
-        .copy-notification {
+        /* 通知樣式 */
+        .copy-notification, .download-notification {
             position: fixed;
             bottom: 30px;
             right: 30px;
@@ -580,276 +448,75 @@
             color: white;
             padding: 15px 25px;
             border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             display: flex;
             align-items: center;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.3s;
-            z-index: 1000;
-        }
-        
-        .copy-notification.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        .copy-notification i {
-            margin-right: 10px;
-            font-size: 1.2rem;
-        }
-        
-        /* 下載通知 */
-        .download-notification {
-            position: fixed;
-            bottom: 30px;
-            left: 30px;
-            background-color: #4361ee;
-            color: white;
-            padding: 15px 25px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
-            display: flex;
-            align-items: center;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.3s;
-            z-index: 1000;
-        }
-        
-        .download-notification.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        .download-notification i {
-            margin-right: 10px;
-            font-size: 1.2rem;
-        }
-        
-        /* 快速顏色選擇按鈕 */
-        .quick-color-btn {
-            margin-top: 5px;
-            padding: 4px 8px;
-            font-size: 0.75rem;
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .quick-color-btn:hover {
-            background-color: #e9ecef;
-        }
-        
-        /* Excel 樣式顏色分組 */
-        .color-group {
-            margin-bottom: 15px;
-        }
-        
-        .color-group-title {
-            font-size: 0.8rem;
-            color: #666;
-            margin-bottom: 5px;
-            text-align: left;
-            font-weight: normal;
-        }
-        
-        /* 自訂顏色區域 */
-        .custom-color-section {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #eee;
-        }
-        
-        .custom-color-inputs {
-            display: flex;
             gap: 10px;
-            margin-bottom: 10px;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
         }
         
-        .custom-color-input {
-            width: 60px;
-            text-align: center;
+        .copy-notification.show, .download-notification.show {
+            opacity: 1;
+            transform: translateY(0);
         }
         
-        .custom-color-preview {
-            width: 100%;
-            height: 30px;
-            border-radius: 4px;
-            border: 1px solid #dee2e6;
-            margin-bottom: 10px;
+        .download-notification {
+            background-color: #4361ee;
         }
         
         /* 響應式調整 */
         @media (max-width: 768px) {
-            .container {
-                padding: 15px;
+            .action-buttons {
+                flex-direction: column;
             }
             
-            .weekly-calendar-header,
-            .week-row {
+            .weekly-calendar-header {
                 grid-template-columns: repeat(7, 1fr);
+                font-size: 0.9rem;
+            }
+            
+            .weekday-header {
+                padding: 10px 3px;
+                font-size: 0.9rem;
             }
             
             .day-cell {
-                min-height: 100px;
-                padding: 8px 5px;
+                height: 100px;
+                padding: 8px 3px;
             }
             
             .day-date {
+                font-size: 1.2rem;
+            }
+            
+            .day-shift {
                 font-size: 1rem;
             }
             
-            .day-shift {
-                font-size: 0.9rem;
-                padding: 3px 6px;
-                min-height: 32px;
-            }
-            
-            .action-buttons {
-                flex-direction: column;
-                gap: 10px;
-            }
-            
-            .action-btn {
-                width: 100%;
-                justify-content: center;
+            .day-shift-time {
+                font-size: 0.7rem;
             }
             
             .color-setting-item {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .shift-label, .time-label {
-                min-width: 100%;
-                margin-bottom: 5px;
+                flex-wrap: wrap;
             }
             
             .color-input-group {
-                width: 100%;
-                justify-content: space-between;
-            }
-            
-            .color-input {
-                width: 60px;
-            }
-            
-            .color-quick-panel {
-                position: fixed !important;
-                top: 50% !important;
-                left: 50% !important;
-                transform: translate(-50%, -50%) !important;
-                z-index: 2000;
-                max-width: 90vw;
-                max-height: 70vh;
-            }
-            
-            .quick-colors-grid {
-                grid-template-columns: repeat(6, 1fr);
-            }
-            
-            .copy-notification,
-            .download-notification {
-                bottom: 15px;
-                right: 15px;
-                left: 15px;
+                flex-wrap: wrap;
                 justify-content: center;
             }
-        }
-        
-        @media (max-width: 576px) {
-            .weekday-header {
-                font-size: 0.8rem;
-                padding: 8px 5px;
-                min-height: 40px;
-            }
-            
-            .day-cell {
-                min-height: 90px;
-            }
-            
-            .day-date {
-                font-size: 0.9rem;
-            }
-            
-            .day-shift {
-                font-size: 0.8rem;
-                min-height: 28px;
-            }
-            
-            .quick-colors-grid {
-                grid-template-columns: repeat(5, 1fr);
-            }
-            
-            .quick-color-item {
-                width: 20px;
-                height: 20px;
-            }
-        }
-        
-        /* 防止文字選取 */
-        .no-select {
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-        
-        /* 400D單色濾鏡色彩盤樣式 */
-        .filter-colors-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 6px;
-            margin-bottom: 15px;
-        }
-        
-        .filter-color-item {
-            width: 28px;
-            height: 28px;
-            border-radius: 4px;
-            border: 1px solid #e0e0e0;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-sizing: border-box;
-        }
-        
-        .filter-color-item:hover {
-            transform: scale(1.15);
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-            border-color: #999;
-            z-index: 1;
-            position: relative;
-        }
-        
-        .filter-group {
-            margin-bottom: 15px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-        }
-        
-        .filter-group:last-child {
-            border-bottom: none;
-        }
-        
-        .filter-group-title {
-            font-size: 0.85rem;
-            color: #333;
-            margin-bottom: 8px;
-            text-align: left;
-            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <!-- 原本的HTML內容保持不變 -->
     <div class="container">
         <!-- 標題 -->
         <div class="text-center mb-4">
             <h1 class="fw-bold text-primary mb-2">
-                <i class="bi bi-calendar-check"></i> 班表查詢工具
+                <i class="bi bi-calendar-check"></i> 班表小助手
             </h1>
             <p class="text-muted">上傳Excel班表，查詢人員整月班表</p>
             <p class="text-muted small">支援 .xlsx 和 .xls 格式</p>
@@ -868,11 +535,11 @@
                     </h4>
                     <p class="text-muted mb-3">請選擇Excel班表檔案 (.xlsx 或 .xls)</p>
                     
-                    <!-- 單一檔案選擇按鈕 -->
+                    <!-- 單一檔案選擇按鈕 - 簡化版本 -->
                     <div class="upload-btn-container">
-                        <input type="file" id="fileInput" class="file-input-hidden" accept=".xlsx,.xls">
+                        <input type="file" id="fileInput" class="file-input-hidden" accept=".xlsx,.xls,.xlsm">
                         <button class="btn btn-primary btn-lg" id="selectFileBtn" type="button">
-                            <i class="bi bi-folder2-open"></i> <span class="blue-text">選擇檔案</span>
+                            <i class="bi bi-folder2-open"></i> <span class="file-btn-text">選擇檔案</span>
                         </button>
                     </div>
                     
@@ -914,6 +581,21 @@
                     <button class="btn btn-secondary" id="resetColorsBtn">
                         <i class="bi bi-arrow-clockwise"></i> 重設顏色
                     </button>
+                </div>
+            </div>
+            
+            <!-- 週開始選擇器 -->
+            <div class="week-start-selector" id="weekStartSelector" style="display: none;">
+                <h5 class="mb-3"><i class="bi bi-calendar-week"></i> 週曆設定</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="weekStartDaySelect" class="form-label">每週的第一天</label>
+                        <select class="form-select" id="weekStartDaySelect">
+                            <option value="1">週一</option>
+                            <option value="0">週日</option>
+                        </select>
+                        <small class="text-muted">選擇每週從週日還是週一開始計算</small>
+                    </div>
                 </div>
             </div>
             
@@ -959,6 +641,9 @@
                                 <div class="mb-3">
                                     <span id="personCategoryDisplay" class="badge bg-secondary me-2"></span>
                                 </div>
+                                <div>
+                                    <span id="monthDisplay" class="badge bg-primary"></span>
+                                </div>
                             </div>
                             <div class="col-md-4 text-md-end">
                                 <div class="mt-2">
@@ -970,20 +655,16 @@
                         </div>
                     </div>
                     
-                    <!-- 人員整月班表 - 週曆格式 -->
+                    <!-- 人員整月班表 - 表格格式 -->
                     <div id="personWeeklyCalendar" class="weekly-calendar" style="display: none;">
-                        <div class="weekly-calendar-header">
-                            <div class="weekday-header">週一</div>
-                            <div class="weekday-header">週二</div>
-                            <div class="weekday-header">週三</div>
-                            <div class="weekday-header">週四</div>
-                            <div class="weekday-header">週五</div>
-                            <div class="weekday-header weekend">週六</div>
-                            <div class="weekday-header weekend">週日</div>
-                        </div>
-                        <div class="weekly-calendar-body" id="weeklyCalendarBody">
-                            <!-- 週曆內容會在這裡動態產生 -->
-                        </div>
+                        <table class="weekly-calendar-table">
+                            <thead id="weekHeader" class="weekly-calendar-header">
+                                <!-- 週曆表頭會動態產生 -->
+                            </thead>
+                            <tbody id="weeklyCalendarBody" class="weekly-calendar-body">
+                                <!-- 週曆內容會在這裡動態產生 -->
+                            </tbody>
+                        </table>
                     </div>
                     
                     <!-- 班表統計 - 折疊版本 -->
@@ -1070,141 +751,16 @@
             '體檢': { r: 108, g: 117, b: 125 } // 灰色
         };
 
-        // 400D單色濾鏡色彩盤 - 按照色系淺、中、深排列
-        const filterColors = {
-            '紅色系': [
-                { r: 255, g: 235, b: 235 }, // 淺紅
-                { r: 255, g: 200, b: 200 }, // 淺紅-中
-                { r: 255, g: 175, b: 175 }, // 中紅-淺
-                { r: 255, g: 150, b: 150 }, // 中紅
-                { r: 255, g: 120, b: 120 }, // 中紅-深
-                { r: 255, g: 90, b: 90 },   // 深紅-淺
-                { r: 255, g: 60, b: 60 },   // 深紅
-                { r: 220, g: 40, b: 40 },   // 深紅-暗
-                { r: 180, g: 30, b: 30 },   // 暗紅
-                { r: 140, g: 20, b: 20 }    // 暗紅-深
-            ],
-            '藍色系': [
-                { r: 235, g: 245, b: 255 }, // 淺藍
-                { r: 200, g: 230, b: 255 }, // 淺藍-中
-                { r: 175, g: 215, b: 255 }, // 中藍-淺
-                { r: 150, g: 200, b: 255 }, // 中藍
-                { r: 120, g: 180, b: 255 }, // 中藍-深
-                { r: 90, g: 160, b: 255 },  // 深藍-淺
-                { r: 60, g: 140, b: 255 },  // 深藍
-                { r: 40, g: 110, b: 220 },  // 深藍-暗
-                { r: 30, g: 80, b: 180 },   // 暗藍
-                { r: 20, g: 50, b: 140 }    // 暗藍-深
-            ],
-            '綠色系': [
-                { r: 235, g: 255, b: 235 }, // 淺綠
-                { r: 200, g: 255, b: 200 }, // 淺綠-中
-                { r: 175, g: 235, b: 175 }, // 中綠-淺
-                { r: 150, g: 215, b: 150 }, // 中綠
-                { r: 120, g: 195, b: 120 }, // 中綠-深
-                { r: 90, g: 175, b: 90 },   // 深綠-淺
-                { r: 60, g: 155, b: 60 },   // 深綠
-                { r: 40, g: 130, b: 40 },   // 深綠-暗
-                { r: 30, g: 105, b: 30 },   // 暗綠
-                { r: 20, g: 80, b: 20 }     // 暗綠-深
-            ],
-            '黃色系': [
-                { r: 255, g: 255, b: 235 }, // 淺黃
-                { r: 255, g: 255, b: 200 }, // 淺黃-中
-                { r: 255, g: 245, b: 175 }, // 中黃-淺
-                { r: 255, g: 235, b: 150 }, // 中黃
-                { r: 255, g: 225, b: 120 }, // 中黃-深
-                { r: 255, g: 215, b: 90 },  // 深黃-淺
-                { r: 255, g: 205, b: 60 },  // 深黃
-                { r: 230, g: 180, b: 40 },  // 深黃-暗
-                { r: 200, g: 150, b: 30 },  // 暗黃
-                { r: 170, g: 120, b: 20 }   // 暗黃-深
-            ],
-            '紫色系': [
-                { r: 245, g: 235, b: 255 }, // 淺紫
-                { r: 230, g: 200, b: 255 }, // 淺紫-中
-                { r: 215, g: 175, b: 235 }, // 中紫-淺
-                { r: 200, g: 150, b: 215 }, // 中紫
-                { r: 185, g: 120, b: 195 }, // 中紫-深
-                { r: 170, g: 90, b: 175 },  // 深紫-淺
-                { r: 155, g: 60, b: 155 },  // 深紫
-                { r: 130, g: 40, b: 130 },  // 深紫-暗
-                { r: 105, g: 30, b: 105 },  // 暗紫
-                { r: 80, g: 20, b: 80 }     // 暗紫-深
-            ],
-            '橙色系': [
-                { r: 255, g: 245, b: 235 }, // 淺橙
-                { r: 255, g: 230, b: 200 }, // 淺橙-中
-                { r: 255, g: 215, b: 175 }, // 中橙-淺
-                { r: 255, g: 200, b: 150 }, // 中橙
-                { r: 255, g: 185, b: 120 }, // 中橙-深
-                { r: 255, g: 170, b: 90 },  // 深橙-淺
-                { r: 255, g: 155, b: 60 },  // 深橙
-                { r: 230, g: 130, b: 40 },  // 深橙-暗
-                { r: 200, g: 105, b: 30 },  // 暗橙
-                { r: 170, g: 80, b: 20 }    // 暗橙-深
-            ],
-            '灰色系': [
-                { r: 250, g: 250, b: 250 }, // 淺灰
-                { r: 240, g: 240, b: 240 }, // 淺灰-中
-                { r: 220, g: 220, b: 220 }, // 中灰-淺
-                { r: 200, g: 200, b: 200 }, // 中灰
-                { r: 180, g: 180, b: 180 }, // 中灰-深
-                { r: 160, g: 160, b: 160 }, // 深灰-淺
-                { r: 140, g: 140, b: 140 }, // 深灰
-                { r: 120, g: 120, b: 120 }, // 深灰-暗
-                { r: 100, g: 100, b: 100 }, // 暗灰
-                { r: 80, g: 80, b: 80 }     // 暗灰-深
-            ],
-            '粉色系': [
-                { r: 255, g: 235, b: 245 }, // 淺粉
-                { r: 255, g: 200, b: 230 }, // 淺粉-中
-                { r: 255, g: 175, b: 215 }, // 中粉-淺
-                { r: 255, g: 150, b: 200 }, // 中粉
-                { r: 255, g: 120, b: 185 }, // 中粉-深
-                { r: 255, g: 90, b: 170 },  // 深粉-淺
-                { r: 255, g: 60, b: 155 },  // 深粉
-                { r: 230, g: 40, b: 130 },  // 深粉-暗
-                { r: 200, g: 30, b: 105 },  // 暗粉
-                { r: 170, g: 20, b: 80 }    // 暗粉-深
-            ],
-            '青色系': [
-                { r: 235, g: 255, b: 255 }, // 淺青
-                { r: 200, g: 255, b: 255 }, // 淺青-中
-                { r: 175, g: 235, b: 235 }, // 中青-淺
-                { r: 150, g: 215, b: 215 }, // 中青
-                { r: 120, g: 195, b: 195 }, // 中青-深
-                { r: 90, g: 175, b: 175 },  // 深青-淺
-                { r: 60, g: 155, b: 155 },  // 深青
-                { r: 40, g: 130, b: 130 },  // 深青-暗
-                { r: 30, g: 105, b: 105 },  // 暗青
-                { r: 20, g: 80, b: 80 }     // 暗青-深
-            ],
-            '棕色系': [
-                { r: 245, g: 235, b: 220 }, // 淺棕
-                { r: 230, g: 210, b: 180 }, // 淺棕-中
-                { r: 215, g: 185, b: 150 }, // 中棕-淺
-                { r: 200, g: 160, b: 120 }, // 中棕
-                { r: 185, g: 135, b: 100 }, // 中棕-深
-                { r: 170, g: 110, b: 80 },  // 深棕-淺
-                { r: 155, g: 85, b: 60 },   // 深棕
-                { r: 130, g: 65, b: 40 },   // 深棕-暗
-                { r: 105, g: 50, b: 30 },   // 暗棕
-                { r: 80, g: 35, b: 20 }     // 暗棕-深
-            ]
-        };
-
         // 資料儲存
         let scheduleData = [];
         let allDates = [];
         let currentFileName = '';
-        let isSummaryCollapsed = true; // 班表統計預設折疊
-        let isColorSettingsVisible = true; // 顏色設定區域預設顯示
-        let shiftColors = { ...defaultShiftColors }; // 班型顏色設定
-        let scheduleMonth = 0; // 班表月份
-        let scheduleYear = 0; // 班表年份
-        let colorAdjustInterval = null; // 顏色調整間隔
-        let activeQuickColorPanel = null; // 當前顯示的快速顏色面板
+        let isSummaryCollapsed = true;
+        let isColorSettingsVisible = true;
+        let shiftColors = { ...defaultShiftColors };
+        let scheduleMonth = 0;
+        let scheduleYear = 0;
+        let weekStartDay = 1; // 預設週一開始，0為週日開始
         
         // LocalStorage 金鑰
         const STORAGE_KEYS = {
@@ -1212,16 +768,9 @@
             ALL_DATES: 'allDates_optimized',
             FILE_NAME: 'currentFileName_optimized',
             TIMESTAMP: 'lastUpdated_optimized',
-            SHIFT_COLORS: 'shiftColors_optimized'
+            SHIFT_COLORS: 'shiftColors_optimized',
+            WEEK_START_DAY: 'weekStartDay_optimized'
         };
-        
-        // 新增清除間隔的函數
-        function clearColorAdjustInterval() {
-            if (colorAdjustInterval) {
-                clearInterval(colorAdjustInterval);
-                colorAdjustInterval = null;
-            }
-        }
         
         // 複製通知函數
         function showCopyNotification() {
@@ -1249,6 +798,7 @@
                 const fileName = localStorage.getItem(STORAGE_KEYS.FILE_NAME);
                 const timestamp = localStorage.getItem(STORAGE_KEYS.TIMESTAMP);
                 const shiftColorsStr = localStorage.getItem(STORAGE_KEYS.SHIFT_COLORS);
+                const weekStartDayStr = localStorage.getItem(STORAGE_KEYS.WEEK_START_DAY);
                 
                 if (!scheduleDataStr || !allDatesStr) {
                     console.log("LocalStorage 中沒有儲存的資料");
@@ -1268,6 +818,11 @@
                 // 載入班型顏色設定
                 if (shiftColorsStr) {
                     shiftColors = JSON.parse(shiftColorsStr);
+                }
+                
+                // 載入週開始日設定
+                if (weekStartDayStr) {
+                    weekStartDay = parseInt(weekStartDayStr);
                 }
                 
                 return {
@@ -1290,6 +845,7 @@
                 localStorage.setItem(STORAGE_KEYS.FILE_NAME, fileName);
                 localStorage.setItem(STORAGE_KEYS.TIMESTAMP, new Date().getTime().toString());
                 localStorage.setItem(STORAGE_KEYS.SHIFT_COLORS, JSON.stringify(shiftColors));
+                localStorage.setItem(STORAGE_KEYS.WEEK_START_DAY, weekStartDay.toString());
                 
                 console.log("資料已儲存到 LocalStorage");
                 return true;
@@ -1377,13 +933,19 @@
             };
         }
 
-        // 獲取星期幾
+        // 獲取星期幾文字
         function getDayOfWeek(dayIndex) {
-            const days = ['一', '二', '三', '四', '五', '六', '日'];
+            const days = ['日', '一', '二', '三', '四', '五', '六'];
             return days[dayIndex];
         }
 
-        // 處理檔案 - 修正檔案選擇問題
+        // 獲取完整的星期幾名稱
+        function getFullDayOfWeek(dayIndex) {
+            const days = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
+            return days[dayIndex];
+        }
+
+        // 處理檔案
         function handleFile(file) {
             if (!file) {
                 showError("請選擇有效的檔案");
@@ -1391,7 +953,6 @@
             }
             
             console.log("開始處理檔案:", file.name);
-            console.log("檔案大小:", (file.size / 1024).toFixed(2), "KB");
             
             currentFileName = file.name;
             
@@ -1431,7 +992,7 @@
             reader.readAsBinaryString(file);
         }
 
-        // 解析工作簿
+        // 解析工作簿 - 修正年份月份讀取
         function parseWorkbook(workbook, fileName) {
             scheduleData = [];
             allDates = [];
@@ -1444,34 +1005,39 @@
                 const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
                 
                 console.log("Excel數據行數:", jsonData.length);
-                console.log("Excel數據列數:", jsonData[0] ? jsonData[0].length : 0);
                 
                 if (jsonData.length < 3) {
                     showError('Excel資料行數不足，請確認檔案格式');
                     return;
                 }
                 
-                // 嘗試解析年份和月份
+                // 修正年份和月份讀取 - 從左上角單元格讀取
                 scheduleYear = new Date().getFullYear();
                 scheduleMonth = new Date().getMonth() + 1;
                 
-                // 檢查前兩行，前三列，尋找包含年份和月份的單元格
-                for (let rowIndex = 0; rowIndex < Math.min(2, jsonData.length); rowIndex++) {
-                    const row = jsonData[rowIndex];
-                    if (!row) continue;
-                    for (let colIndex = 0; colIndex < Math.min(3, row.length); colIndex++) {
-                        const cellValue = row[colIndex];
-                        if (cellValue && typeof cellValue === 'string') {
-                            const match = cellValue.match(/(\d{4})年(\d{1,2})月/);
-                            if (match) {
-                                scheduleYear = parseInt(match[1]);
-                                scheduleMonth = parseInt(match[2]);
-                                console.log(`找到班表年份月份: ${scheduleYear}年${scheduleMonth}月`);
-                                break;
-                            }
+                // 從A1單元格讀取年份月份
+                if (jsonData[0] && jsonData[0][0]) {
+                    const cellValue = String(jsonData[0][0]);
+                    console.log("A1單元格內容:", cellValue);
+                    
+                    // 嘗試匹配年份月份格式
+                    const match = cellValue.match(/(\d{4})\s*年\s*(\d{1,2})\s*月/);
+                    if (match) {
+                        scheduleYear = parseInt(match[1]);
+                        scheduleMonth = parseInt(match[2]);
+                        console.log(`從A1找到班表年份月份: ${scheduleYear}年${scheduleMonth}月`);
+                    } else {
+                        // 嘗試其他格式
+                        const match2 = cellValue.match(/(\d{4})\s*\/\s*(\d{1,2})/);
+                        if (match2) {
+                            scheduleYear = parseInt(match2[1]);
+                            scheduleMonth = parseInt(match2[2]);
+                            console.log(`從A1找到班表年份月份(斜線格式): ${scheduleYear}年${scheduleMonth}月`);
                         }
                     }
                 }
+                
+                console.log(`最終年份月份: ${scheduleYear}年${scheduleMonth}月`);
                 
                 // 加強日期行判斷
                 let dateRowIndex = -1;
@@ -1531,13 +1097,15 @@
                         let dateNum = Number(cellValue);
                         
                         if (!isNaN(dateNum) && dateNum >= 1 && dateNum <= 31) {
-                            const firstDayOfMonth = 1;
-                            const dayIndex = (dateNum - 1 + (firstDayOfMonth - 1)) % 7;
-                            const dayOfWeek = getDayOfWeek(dayIndex);
+                            // 計算星期幾
+                            const dateObj = new Date(scheduleYear, scheduleMonth - 1, dateNum);
+                            const dayOfWeekNum = dateObj.getDay(); // 0為週日，1為週一，依此類推
+                            const dayOfWeek = getDayOfWeek(dayOfWeekNum);
                             
                             allDates.push({
                                 colIndex: colIndex,
                                 date: dateNum,
+                                dayOfWeekNum: dayOfWeekNum,
                                 dayOfWeek: dayOfWeek
                             });
                         }
@@ -1554,10 +1122,13 @@
                 // 按照日期順序排序
                 allDates.sort((a, b) => a.date - b.date);
                 
+                const firstDay = allDates.length > 0 ? allDates[0].dayOfWeekNum : 1;
+                console.log("第一天是星期", getDayOfWeek(firstDay), "(數字:", firstDay, ")");
+                
                 const nameColumnIndex = 2;
                 const startRowIndex = dateRowIndex + 1;
                 
-                // 過濾掉的表頭關鍵字 - 增加更多可能的表頭
+                // 過濾掉的表頭關鍵字
                 const skipKeywords = ['姓名', 'Name', '人員', '星期', '週次', '序號', '編號', 'No.', 'NO.', '員工', '人員編號', '日期', 'DAY', 'Day', '天數', '日期/姓名', '日期/人員'];
                 
                 // 讀取所有人員資料
@@ -1573,7 +1144,7 @@
                     
                     const excelName = String(rawName).trim();
                     
-                    // 跳過表頭和無效名稱 - 加強過濾邏輯
+                    // 跳過表頭和無效名稱
                     const shouldSkip = skipKeywords.some(keyword => 
                         excelName === keyword || 
                         excelName.includes(keyword) ||
@@ -1586,8 +1157,8 @@
                         excelName.includes('日期') ||
                         excelName.includes('Day') ||
                         excelName.includes('DAY') ||
-                        /^\d+$/.test(excelName) || // 跳過純數字
-                        /^[A-Za-z]+$/.test(excelName) && excelName.length <= 3) { // 跳過短英文代碼
+                        /^\d+$/.test(excelName) ||
+                        /^[A-Za-z]+$/.test(excelName) && excelName.length <= 3) {
                         continue;
                     }
                     
@@ -1604,7 +1175,7 @@
                             if (shiftStr.startsWith('=') || 
                                 shiftStr.includes('月') || 
                                 shiftStr.includes('日') ||
-                                shiftStr.includes('/') && shiftStr.split('/').length === 3) { // 跳過日期格式如 12/1
+                                shiftStr.includes('/') && shiftStr.split('/').length === 3) {
                                 return;
                             }
                             
@@ -1650,6 +1221,9 @@
                 updatePersonSelect();
                 createColorSettings();
                 
+                // 更新週開始選擇器
+                updateWeekStartSelector();
+                
                 setTimeout(() => {
                     hideLoading();
                     document.getElementById('fileInfo').style.display = 'none';
@@ -1666,6 +1240,332 @@
                 console.error('解析過程錯誤:', error);
                 showError('解析過程發生錯誤: ' + error.message);
             }
+        }
+
+        // 更新週開始選擇器
+        function updateWeekStartSelector() {
+            const weekStartSelector = document.getElementById('weekStartSelector');
+            const weekStartDaySelect = document.getElementById('weekStartDaySelect');
+            
+            if (weekStartSelector && weekStartDaySelect) {
+                weekStartSelector.style.display = 'block';
+                
+                // 設置當前選擇
+                weekStartDaySelect.value = weekStartDay.toString();
+                
+                // 監聽變化 - 修正：立即重新繪製班表
+                weekStartDaySelect.addEventListener('change', function() {
+                    weekStartDay = parseInt(this.value);
+                    localStorage.setItem(STORAGE_KEYS.WEEK_START_DAY, weekStartDay.toString());
+                    
+                    // 立即重新顯示選擇的人員班表
+                    const selectedPersonName = document.getElementById('personSelect').value;
+                    if (selectedPersonName) {
+                        const personData = scheduleData.find(person => person.name === selectedPersonName);
+                        if (personData) {
+                            createWeeklyCalendar(personData);
+                        }
+                    }
+                });
+            }
+        }
+
+        // 建立顏色設定區域
+        function createColorSettings() {
+            const colorSettingsContainer = document.getElementById('colorSettingsContainer');
+            if (!colorSettingsContainer) return;
+            
+            colorSettingsContainer.innerHTML = '';
+            
+            // 建立顏色設定項目
+            Object.keys(shiftDescriptions).forEach(shift => {
+                const color = shiftColors[shift] || { r: 128, g: 128, b: 128 };
+                
+                const colorItem = document.createElement('div');
+                colorItem.className = 'color-setting-item';
+                colorItem.dataset.shift = shift;
+                
+                colorItem.innerHTML = `
+                    <div class="shift-label">${shift}</div>
+                    <div class="time-label">${shiftDescriptions[shift]}</div>
+                    <div class="color-preview no-select" id="colorPreview_${shift}" style="background-color: rgb(${color.r}, ${color.g}, ${color.b})" title="點擊選擇快速顏色"></div>
+                    <div class="color-input-group">
+                        <div class="color-input-wrapper">
+                            <span class="color-input-label">R</span>
+                            <div class="color-input-with-buttons">
+                                <input type="number" min="0" max="255" class="form-control form-control-sm color-input color-r" data-shift="${shift}" value="${color.r}">
+                            </div>
+                        </div>
+                        <div class="color-input-wrapper">
+                            <span class="color-input-label">G</span>
+                            <div class="color-input-with-buttons">
+                                <input type="number" min="0" max="255" class="form-control form-control-sm color-input color-g" data-shift="${shift}" value="${color.g}">
+                            </div>
+                        </div>
+                        <div class="color-input-wrapper">
+                            <span class="color-input-label">B</span>
+                            <div class="color-input-with-buttons">
+                                <input type="number" min="0" max="255" class="form-control form-control-sm color-input color-b" data-shift="${shift}" value="${color.b}">
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                colorSettingsContainer.appendChild(colorItem);
+            });
+            
+            // 顯示顏色設定區域
+            document.getElementById('colorSettingsSection').style.display = 'block';
+            
+            // 綁定顏色輸入事件
+            bindColorInputEvents();
+            
+            console.log("顏色設定區域已建立");
+        }
+
+        // 綁定顏色輸入事件
+        function bindColorInputEvents() {
+            const colorInputs = document.querySelectorAll('.color-input');
+            colorInputs.forEach(input => {
+                input.addEventListener('input', function(e) {
+                    const input = e.target;
+                    const shift = input.dataset.shift;
+                    const type = input.classList.contains('color-r') ? 'r' : 
+                                 input.classList.contains('color-g') ? 'g' : 'b';
+                    
+                    // 獲取輸入值
+                    let value = parseInt(input.value);
+                    
+                    // 檢查是否為有效數字
+                    if (isNaN(value)) {
+                        value = 0;
+                    }
+                    
+                    // 確保值在 0-255 範圍內
+                    if (value < 0) {
+                        value = 0;
+                    } else if (value > 255) {
+                        value = 255;
+                    }
+                    
+                    // 更新輸入框
+                    input.value = value;
+                    
+                    if (!shiftColors[shift]) {
+                        shiftColors[shift] = { r: 128, g: 128, b: 128 };
+                    }
+                    
+                    shiftColors[shift][type] = value;
+                    
+                    // 更新顏色預覽
+                    updateColorPreview(shift);
+                });
+            });
+        }
+
+        // 更新顏色預覽
+        function updateColorPreview(shift) {
+            if (!shift) return;
+            
+            const color = shiftColors[shift] || { r: 128, g: 128, b: 128 };
+            const preview = document.getElementById(`colorPreview_${shift}`);
+            if (preview) {
+                preview.style.backgroundColor = `rgb(${color.r}, ${color.g}, ${color.b})`;
+            }
+            
+            // 即時儲存顏色設定
+            localStorage.setItem(STORAGE_KEYS.SHIFT_COLORS, JSON.stringify(shiftColors));
+            
+            // 即時更新班表顯示
+            updateScheduleWithNewColors();
+            
+            console.log(`更新 ${shift} 的顏色為 RGB(${color.r}, ${color.g}, ${color.b})`);
+        }
+
+        // 使用新顏色更新班表
+        function updateScheduleWithNewColors() {
+            const selectedPersonName = document.getElementById('personSelect').value;
+            if (selectedPersonName) {
+                const personData = scheduleData.find(person => person.name === selectedPersonName);
+                if (personData) {
+                    createWeeklyCalendar(personData);
+                    console.log("班表顏色已即時更新");
+                }
+            }
+        }
+
+        // 更新週曆表頭 - 根據選擇的週開始日
+        function updateWeekHeader() {
+            const weekHeader = document.getElementById('weekHeader');
+            if (!weekHeader) return;
+            
+            weekHeader.innerHTML = '';
+            
+            // 建立表頭行
+            const headerRow = document.createElement('tr');
+            
+            // 根據選擇的週開始日生成表頭
+            let weekDays = [];
+            
+            if (weekStartDay === 0) {
+                // 週日開始
+                weekDays = [
+                    { name: '週日', isWeekend: true },
+                    { name: '週一', isWeekend: false },
+                    { name: '週二', isWeekend: false },
+                    { name: '週三', isWeekend: false },
+                    { name: '週四', isWeekend: false },
+                    { name: '週五', isWeekend: false },
+                    { name: '週六', isWeekend: true }
+                ];
+            } else {
+                // 週一開始 (預設)
+                weekDays = [
+                    { name: '週一', isWeekend: false },
+                    { name: '週二', isWeekend: false },
+                    { name: '週三', isWeekend: false },
+                    { name: '週四', isWeekend: false },
+                    { name: '週五', isWeekend: false },
+                    { name: '週六', isWeekend: true },
+                    { name: '週日', isWeekend: true }
+                ];
+            }
+            
+            weekDays.forEach(day => {
+                const th = document.createElement('th');
+                th.className = `weekday-header ${day.isWeekend ? 'weekend' : ''}`;
+                th.textContent = day.name;
+                headerRow.appendChild(th);
+            });
+            
+            weekHeader.appendChild(headerRow);
+        }
+
+        // 建立週曆表格 - 表格格式（日期格子中只顯示日期數字，不顯示星期幾）
+        function createWeeklyCalendar(personData) {
+            const weeklyCalendarBody = document.getElementById('weeklyCalendarBody');
+            if (!weeklyCalendarBody) return;
+            
+            weeklyCalendarBody.innerHTML = '';
+            
+            // 更新週曆表頭
+            updateWeekHeader();
+            
+            // 獲取當月天數
+            const daysInMonth = new Date(scheduleYear, scheduleMonth, 0).getDate();
+            
+            // 獲取當月第一天是星期幾
+            const firstDayOfMonth = new Date(scheduleYear, scheduleMonth - 1, 1).getDay();
+            
+            // 計算第一週前面的空位數
+            let emptyDaysBefore = 0;
+            
+            if (weekStartDay === 0) {
+                // 週日開始
+                emptyDaysBefore = firstDayOfMonth; // 0=週日，1=週一...
+            } else {
+                // 週一開始
+                emptyDaysBefore = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+            }
+            
+            // 計算總共需要多少格子 (7天×6週 = 42個格子)
+            const totalCells = 42;
+            
+            // 檢查今天是否在班表中
+            const today = new Date();
+            const todayYear = today.getFullYear();
+            const todayMonth = today.getMonth() + 1;
+            const todayDate = today.getDate();
+            
+            // 創建6行 (6週)
+            for (let week = 0; week < 6; week++) {
+                const row = document.createElement('tr');
+                row.className = 'calendar-row';
+                
+                // 每週7天
+                for (let day = 0; day < 7; day++) {
+                    const cellIndex = week * 7 + day;
+                    
+                    // 計算這個格子的日期
+                    let dateNumber = cellIndex - emptyDaysBefore + 1;
+                    
+                    const td = document.createElement('td');
+                    td.className = 'day-cell';
+                    
+                    // 檢查這個日期是否在當月範圍內
+                    if (dateNumber >= 1 && dateNumber <= daysInMonth) {
+                        // 計算這個日期是星期幾
+                        const dateObj = new Date(scheduleYear, scheduleMonth - 1, dateNumber);
+                        const dayOfWeekNum = dateObj.getDay();
+                        
+                        // 檢查是否為今天
+                        const isToday = (scheduleYear === todayYear && scheduleMonth === todayMonth && dateNumber === todayDate);
+                        
+                        // 檢查是否為週末
+                        const isWeekend = dayOfWeekNum === 0 || dayOfWeekNum === 6;
+                        
+                        if (isToday) {
+                            td.classList.add('today');
+                        }
+                        if (isWeekend) {
+                            td.classList.add('weekend');
+                        }
+                        
+                        // 日期顯示 - 只顯示日期數字，不顯示星期幾
+                        const dateDiv = document.createElement('div');
+                        dateDiv.className = 'day-date';
+                        dateDiv.textContent = dateNumber;
+                        td.appendChild(dateDiv);
+                        
+                        // 獲取班表資料
+                        const shiftData = personData.shifts[dateNumber];
+                        
+                        if (shiftData) {
+                            const shift = shiftData.shift;
+                            const originalShift = shiftData.originalShift;
+                            
+                            // 使用自定義顏色
+                            const color = shiftColors[shift] || { r: 128, g: 128, b: 128 };
+                            const backgroundColor = `rgba(${color.r}, ${color.g}, ${color.b}, 0.3)`;
+                            
+                            // 設置背景顏色
+                            td.style.backgroundColor = backgroundColor;
+                            
+                            // 班型顯示
+                            const shiftDiv = document.createElement('div');
+                            shiftDiv.className = 'day-shift';
+                            shiftDiv.textContent = originalShift || shift;
+                            td.appendChild(shiftDiv);
+                            
+                            // 班型時間說明
+                            const description = shiftDescriptions[shift];
+                            if (description) {
+                                const timeDiv = document.createElement('div');
+                                timeDiv.className = 'day-shift-time';
+                                timeDiv.textContent = description;
+                                td.appendChild(timeDiv);
+                            }
+                        } else {
+                            td.style.backgroundColor = '#f8f9fa';
+                            const emptyDiv = document.createElement('div');
+                            emptyDiv.className = 'day-empty';
+                            emptyDiv.textContent = '無資料';
+                            td.appendChild(emptyDiv);
+                        }
+                    } else {
+                        // 不在當月範圍內的格子 (空白)
+                        td.classList.add('empty');
+                        td.style.backgroundColor = '#f8f9fa';
+                        td.innerHTML = '<div class="day-empty"></div>';
+                    }
+                    
+                    row.appendChild(td);
+                }
+                
+                weeklyCalendarBody.appendChild(row);
+            }
+            
+            console.log("週曆表格建立完成，當月天數:", daysInMonth, "空位數:", emptyDaysBefore);
         }
 
         // 更新人員選單
@@ -1705,663 +1605,6 @@
             });
             
             console.log("人員選單更新完成，有效人員:", sortedPersons.length, "人");
-            console.log("人員列表:", sortedPersons.map(p => p.name));
-        }
-
-        // 建立顏色設定區域
-        function createColorSettings() {
-            const colorSettingsContainer = document.getElementById('colorSettingsContainer');
-            if (!colorSettingsContainer) return;
-            
-            colorSettingsContainer.innerHTML = '';
-            
-            // 建立顏色設定項目
-            Object.keys(shiftDescriptions).forEach(shift => {
-                const color = shiftColors[shift] || { r: 128, g: 128, b: 128 };
-                
-                const colorItem = document.createElement('div');
-                colorItem.className = 'color-setting-item';
-                colorItem.dataset.shift = shift;
-                
-                colorItem.innerHTML = `
-                    <div class="shift-label">${shift}</div>
-                    <div class="time-label">${shiftDescriptions[shift]}</div>
-                    <div class="color-preview no-select" id="colorPreview_${shift}" style="background-color: rgb(${color.r}, ${color.g}, ${color.b})" title="點擊選擇快速顏色"></div>
-                    <div class="color-input-group">
-                        <div class="color-input-wrapper">
-                            <span class="color-input-label">R</span>
-                            <div class="color-input-with-buttons">
-                                <input type="number" min="0" max="255" class="form-control form-control-sm color-input color-r" data-shift="${shift}" value="${color.r}">
-                                <div class="color-buttons">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary color-btn color-btn-up no-select" data-shift="${shift}" data-type="r" data-dir="up">▲</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary color-btn color-btn-down no-select" data-shift="${shift}" data-type="r" data-dir="down">▼</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="color-input-wrapper">
-                            <span class="color-input-label">G</span>
-                            <div class="color-input-with-buttons">
-                                <input type="number" min="0" max="255" class="form-control form-control-sm color-input color-g" data-shift="${shift}" value="${color.g}">
-                                <div class="color-buttons">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary color-btn color-btn-up no-select" data-shift="${shift}" data-type="g" data-dir="up">▲</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary color-btn color-btn-down no-select" data-shift="${shift}" data-type="g" data-dir="down">▼</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="color-input-wrapper">
-                            <span class="color-input-label">B</span>
-                            <div class="color-input-with-buttons">
-                                <input type="number" min="0" max="255" class="form-control form-control-sm color-input color-b" data-shift="${shift}" value="${color.b}">
-                                <div class="color-buttons">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary color-btn color-btn-up no-select" data-shift="${shift}" data-type="b" data-dir="up">▲</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary color-btn color-btn-down no-select" data-shift="${shift}" data-type="b" data-dir="down">▼</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                colorSettingsContainer.appendChild(colorItem);
-                
-                // 為顏色預覽框添加點擊事件
-                setTimeout(() => {
-                    const colorPreview = document.getElementById(`colorPreview_${shift}`);
-                    if (colorPreview) {
-                        colorPreview.addEventListener('click', function(e) {
-                            e.stopPropagation();
-                            console.log(`點擊顏色預覽框: ${shift}`);
-                            showFilterColorPanel(shift, this);
-                        });
-                    }
-                }, 100);
-            });
-            
-            // 顯示顏色設定區域
-            document.getElementById('colorSettingsSection').style.display = 'block';
-            
-            // 綁定顏色按鈕事件
-            bindColorButtonEvents();
-            
-            // 添加輸入框blur事件
-            addColorInputBlurEvent();
-            
-            console.log("顏色設定區域已建立");
-        }
-
-        // 顯示濾鏡色彩盤面板
-        function showFilterColorPanel(shift, targetElement) {
-            console.log(`顯示濾鏡色彩盤面板 for ${shift}`, targetElement);
-            
-            // 如果已經有打開的面板，先關閉它
-            if (activeQuickColorPanel) {
-                console.log("關閉現有面板");
-                activeQuickColorPanel.remove();
-            }
-            
-            // 創建快速顏色面板
-            const quickPanel = document.createElement('div');
-            quickPanel.className = 'color-quick-panel';
-            quickPanel.id = `quickColorPanel_${shift}`;
-            quickPanel.dataset.shift = shift;
-            quickPanel.style.zIndex = '10000';
-            quickPanel.style.position = 'fixed';
-            quickPanel.style.display = 'block';
-            
-            // 建立濾鏡色彩盤
-            let quickColorsHTML = '<div class="color-quick-panel-title">選擇顏色 (400D單色濾鏡)</div>';
-            
-            // 建立每個色系的色彩網格
-            for (const [colorGroupName, colorGroup] of Object.entries(filterColors)) {
-                quickColorsHTML += '<div class="filter-group">';
-                quickColorsHTML += `<div class="filter-group-title">${colorGroupName}</div>`;
-                quickColorsHTML += '<div class="filter-colors-grid">';
-                
-                colorGroup.forEach(color => {
-                    quickColorsHTML += `
-                        <div class="filter-color-item no-select" 
-                             style="background-color: rgb(${color.r}, ${color.g}, ${color.b});"
-                             data-r="${color.r}" 
-                             data-g="${color.g}" 
-                             data-b="${color.b}"
-                             title="RGB(${color.r}, ${color.g}, ${color.b})">
-                        </div>
-                    `;
-                });
-                
-                quickColorsHTML += '</div></div>';
-            }
-            
-            // 自訂顏色區域
-            const currentColor = shiftColors[shift] || { r: 128, g: 128, b: 128 };
-            quickColorsHTML += `
-                <div class="custom-color-section">
-                    <div class="color-group-title">自訂顏色</div>
-                    <div class="custom-color-preview" id="customColorPreview_${shift}" style="background-color: rgb(${currentColor.r}, ${currentColor.g}, ${currentColor.b})"></div>
-                    <div class="custom-color-inputs">
-                        <input type="number" min="0" max="255" class="form-control form-control-sm custom-color-input custom-r" data-shift="${shift}" placeholder="R" value="${currentColor.r}">
-                        <input type="number" min="0" max="255" class="form-control form-control-sm custom-color-input custom-g" data-shift="${shift}" placeholder="G" value="${currentColor.g}">
-                        <input type="number" min="0" max="255" class="form-control form-control-sm custom-color-input custom-b" data-shift="${shift}" placeholder="B" value="${currentColor.b}">
-                        <button type="button" class="btn btn-sm btn-primary" id="applyCustomColor_${shift}">套用</button>
-                    </div>
-                    <div class="d-flex justify-content-between mt-2">
-                        <button type="button" class="btn btn-sm btn-outline-secondary quick-color-btn" id="resetToDefault_${shift}">
-                            <i class="bi bi-arrow-clockwise"></i> 重置為預設
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary quick-color-btn" id="copyFromAnother_${shift}">
-                            <i class="bi bi-files"></i> 複製其他班型
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            quickPanel.innerHTML = quickColorsHTML;
-            
-            // 添加到頁面
-            document.body.appendChild(quickPanel);
-            
-            // 設定為當前活動面板
-            activeQuickColorPanel = quickPanel;
-            
-            // 計算位置 - 確保面板不會被遮擋
-            const rect = targetElement.getBoundingClientRect();
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-            
-            // 面板尺寸
-            const panelWidth = quickPanel.offsetWidth || 320;
-            const panelHeight = quickPanel.offsetHeight || 500;
-            
-            // 計算位置 - 優先顯示在點擊元素上方，如果上方空間不夠則顯示在下方
-            let top, left;
-            
-            // 檢查上方空間是否足夠
-            if (rect.top + scrollTop - panelHeight - 10 > scrollTop) {
-                // 上方空間足夠，顯示在上方
-                top = rect.top + scrollTop - panelHeight - 10;
-            } else {
-                // 上方空間不足，顯示在下方
-                top = rect.bottom + scrollTop + 10;
-            }
-            
-            // 檢查左側空間是否足夠
-            if (rect.left + scrollLeft + panelWidth > window.innerWidth + scrollLeft) {
-                // 右側空間不足，向左移動
-                left = window.innerWidth + scrollLeft - panelWidth - 10;
-            } else {
-                // 右側空間足夠，保持原位
-                left = rect.left + scrollLeft;
-            }
-            
-            // 確保位置不為負值
-            top = Math.max(scrollTop + 10, top);
-            left = Math.max(scrollLeft + 10, left);
-            
-            // 如果面板超出視窗底部，調整位置
-            if (top + panelHeight > window.innerHeight + scrollTop) {
-                top = window.innerHeight + scrollTop - panelHeight - 10;
-            }
-            
-            quickPanel.style.top = `${top}px`;
-            quickPanel.style.left = `${left}px`;
-            
-            console.log("快速顏色面板位置:", top, left);
-            
-            // 添加點擊事件到濾鏡顏色選項
-            setTimeout(() => {
-                const filterColorItems = quickPanel.querySelectorAll('.filter-color-item');
-                filterColorItems.forEach(item => {
-                    item.addEventListener('click', function() {
-                        const r = parseInt(this.dataset.r);
-                        const g = parseInt(this.dataset.g);
-                        const b = parseInt(this.dataset.b);
-                        
-                        console.log(`選擇顏色: RGB(${r}, ${g}, ${b}) for ${shift}`);
-                        
-                        // 更新顏色
-                        shiftColors[shift] = { r, g, b };
-                        
-                        // 更新輸入框
-                        const rInput = document.querySelector(`.color-input.color-r[data-shift="${shift}"]`);
-                        const gInput = document.querySelector(`.color-input.color-g[data-shift="${shift}"]`);
-                        const bInput = document.querySelector(`.color-input.color-b[data-shift="${shift}"]`);
-                        
-                        if (rInput) rInput.value = r;
-                        if (gInput) gInput.value = g;
-                        if (bInput) bInput.value = b;
-                        
-                        // 更新顏色預覽
-                        updateColorPreview(shift);
-                        
-                        // 關閉面板
-                        closeQuickColorPanel();
-                    });
-                });
-                
-                // 自訂顏色輸入事件
-                const customRInput = quickPanel.querySelector(`.custom-r[data-shift="${shift}"]`);
-                const customGInput = quickPanel.querySelector(`.custom-g[data-shift="${shift}"]`);
-                const customBInput = quickPanel.querySelector(`.custom-b[data-shift="${shift}"]`);
-                const customPreview = document.getElementById(`customColorPreview_${shift}`);
-                const applyCustomBtn = document.getElementById(`applyCustomColor_${shift}`);
-                
-                // 更新預覽
-                function updateCustomPreview() {
-                    const r = parseInt(customRInput.value) || 0;
-                    const g = parseInt(customGInput.value) || 0;
-                    const b = parseInt(customBInput.value) || 0;
-                    
-                    customPreview.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
-                }
-                
-                customRInput.addEventListener('input', updateCustomPreview);
-                customGInput.addEventListener('input', updateCustomPreview);
-                customBInput.addEventListener('input', updateCustomPreview);
-                
-                // 套用自訂顏色
-                if (applyCustomBtn) {
-                    applyCustomBtn.addEventListener('click', function() {
-                        const r = parseInt(customRInput.value) || 0;
-                        const g = parseInt(customGInput.value) || 0;
-                        const b = parseInt(customBInput.value) || 0;
-                        
-                        console.log(`套用自訂顏色: RGB(${r}, ${g}, ${b}) for ${shift}`);
-                        
-                        // 確保值在範圍內
-                        const validR = Math.max(0, Math.min(255, r));
-                        const validG = Math.max(0, Math.min(255, g));
-                        const validB = Math.max(0, Math.min(255, b));
-                        
-                        // 更新顏色
-                        shiftColors[shift] = { r: validR, g: validG, b: validB };
-                        
-                        // 更新輸入框
-                        const rInput = document.querySelector(`.color-input.color-r[data-shift="${shift}"]`);
-                        const gInput = document.querySelector(`.color-input.color-g[data-shift="${shift}"]`);
-                        const bInput = document.querySelector(`.color-input.color-b[data-shift="${shift}"]`);
-                        
-                        if (rInput) rInput.value = validR;
-                        if (gInput) gInput.value = validG;
-                        if (bInput) bInput.value = validB;
-                        
-                        // 更新顏色預覽
-                        updateColorPreview(shift);
-                        
-                        // 關閉面板
-                        closeQuickColorPanel();
-                    });
-                }
-                
-                // 添加重置按鈕事件
-                const resetBtn = quickPanel.querySelector(`#resetToDefault_${shift}`);
-                if (resetBtn) {
-                    resetBtn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        console.log(`重置 ${shift} 為預設顏色`);
-                        
-                        // 重置為預設顏色
-                        if (defaultShiftColors[shift]) {
-                            shiftColors[shift] = { ...defaultShiftColors[shift] };
-                        } else {
-                            // 如果沒有預設顏色，使用灰色
-                            shiftColors[shift] = { r: 128, g: 128, b: 128 };
-                        }
-                        
-                        // 更新輸入框
-                        const rInput = document.querySelector(`.color-input.color-r[data-shift="${shift}"]`);
-                        const gInput = document.querySelector(`.color-input.color-g[data-shift="${shift}"]`);
-                        const bInput = document.querySelector(`.color-input.color-b[data-shift="${shift}"]`);
-                        
-                        if (rInput) rInput.value = shiftColors[shift].r;
-                        if (gInput) gInput.value = shiftColors[shift].g;
-                        if (bInput) bInput.value = shiftColors[shift].b;
-                        
-                        // 更新顏色預覽
-                        updateColorPreview(shift);
-                        
-                        // 關閉面板
-                        closeQuickColorPanel();
-                    });
-                }
-                
-                // 添加複製其他班型按鈕事件
-                const copyBtn = quickPanel.querySelector(`#copyFromAnother_${shift}`);
-                if (copyBtn) {
-                    copyBtn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        
-                        // 創建班型選擇下拉選單
-                        const shiftSelect = document.createElement('select');
-                        shiftSelect.className = 'form-select form-select-sm mt-2';
-                        shiftSelect.innerHTML = '<option value="">選擇要複製的班型...</option>';
-                        
-                        // 添加所有班型選項（排除自己）
-                        Object.keys(shiftDescriptions).forEach(otherShift => {
-                            if (otherShift !== shift && shiftColors[otherShift]) {
-                                const color = shiftColors[otherShift];
-                                shiftSelect.innerHTML += `<option value="${otherShift}">${otherShift} (${shiftDescriptions[otherShift]}) - RGB(${color.r}, ${color.g}, ${color.b})</option>`;
-                            }
-                        });
-                        
-                        // 替換按鈕區域為選擇器
-                        const buttonContainer = this.parentElement;
-                        buttonContainer.innerHTML = '';
-                        buttonContainer.appendChild(shiftSelect);
-                        
-                        // 添加選擇事件
-                        shiftSelect.addEventListener('change', function() {
-                            const selectedShift = this.value;
-                            if (selectedShift && shiftColors[selectedShift]) {
-                                console.log(`複製 ${selectedShift} 的顏色到 ${shift}`);
-                                
-                                // 複製顏色
-                                shiftColors[shift] = { ...shiftColors[selectedShift] };
-                                
-                                // 更新輸入框
-                                const rInput = document.querySelector(`.color-input.color-r[data-shift="${shift}"]`);
-                                const gInput = document.querySelector(`.color-input.color-g[data-shift="${shift}"]`);
-                                const bInput = document.querySelector(`.color-input.color-b[data-shift="${shift}"]`);
-                                
-                                if (rInput) rInput.value = shiftColors[shift].r;
-                                if (gInput) gInput.value = shiftColors[shift].g;
-                                if (bInput) bInput.value = shiftColors[shift].b;
-                                
-                                // 更新顏色預覽
-                                updateColorPreview(shift);
-                                
-                                // 關閉面板
-                                closeQuickColorPanel();
-                            }
-                        });
-                    });
-                }
-            }, 10);
-            
-            // 阻止點擊事件冒泡到document
-            quickPanel.addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
-        }
-
-        // 關閉快速顏色面板
-        function closeQuickColorPanel() {
-            if (activeQuickColorPanel) {
-                console.log("關閉快速顏色面板");
-                activeQuickColorPanel.remove();
-                activeQuickColorPanel = null;
-            }
-        }
-
-        // 綁定顏色按鈕事件（支持按住持續調整）
-        function bindColorButtonEvents() {
-            const colorButtons = document.querySelectorAll('.color-btn');
-            
-            colorButtons.forEach(button => {
-                // 清除現有事件
-                button.removeEventListener('mousedown', handleColorButtonMouseDown);
-                button.removeEventListener('mouseup', handleColorButtonMouseUp);
-                button.removeEventListener('mouseleave', handleColorButtonMouseUp);
-                button.removeEventListener('touchstart', handleColorButtonTouchStart);
-                button.removeEventListener('touchend', handleColorButtonTouchEnd);
-                button.removeEventListener('touchcancel', handleColorButtonTouchEnd);
-                
-                // 綁定新事件
-                button.addEventListener('mousedown', handleColorButtonMouseDown);
-                button.addEventListener('mouseup', handleColorButtonMouseUp);
-                button.addEventListener('mouseleave', handleColorButtonMouseUp);
-                button.addEventListener('touchstart', handleColorButtonTouchStart);
-                button.addEventListener('touchend', handleColorButtonTouchEnd);
-                button.addEventListener('touchcancel', handleColorButtonTouchEnd);
-            });
-        }
-
-        // 處理顏色按鈕滑鼠按下事件
-        function handleColorButtonMouseDown(event) {
-            event.preventDefault();
-            // 防止文字選取
-            if (event.preventDefault) {
-                event.preventDefault();
-            }
-            
-            const button = event.target;
-            const shift = button.dataset.shift;
-            const type = button.dataset.type;
-            const dir = button.dataset.dir;
-            
-            // 清除現有間隔
-            clearColorAdjustInterval();
-            
-            // 立即調整一次
-            adjustColorValue(shift, type, dir);
-            
-            // 設置間隔持續調整
-            colorAdjustInterval = setInterval(() => {
-                adjustColorValue(shift, type, dir);
-            }, 50);
-            
-            // 添加文檔級別的事件監聽器
-            const stopAdjustment = function() {
-                clearColorAdjustInterval();
-                document.removeEventListener('mouseup', stopAdjustment);
-                document.removeEventListener('touchend', stopAdjustment);
-            };
-            
-            document.addEventListener('mouseup', stopAdjustment);
-            document.addEventListener('touchend', stopAdjustment);
-        }
-
-        // 處理顏色按鈕滑鼠釋放事件
-        function handleColorButtonMouseUp() {
-            clearColorAdjustInterval();
-        }
-
-        // 處理顏色按鈕觸摸開始事件 - 修正版本，防止文字選取
-        function handleColorButtonTouchStart(event) {
-            // 防止預設行為（如文字選取）
-            event.preventDefault();
-            
-            const button = event.target;
-            const shift = button.dataset.shift;
-            const type = button.dataset.type;
-            const dir = button.dataset.dir;
-            
-            // 清除現有間隔
-            clearColorAdjustInterval();
-            
-            // 立即調整一次
-            adjustColorValue(shift, type, dir);
-            
-            // 設置間隔持續調整
-            colorAdjustInterval = setInterval(() => {
-                adjustColorValue(shift, type, dir);
-            }, 50);
-            
-            // 添加文檔級別的事件監聽器
-            const stopAdjustment = function() {
-                clearColorAdjustInterval();
-                document.removeEventListener('touchend', stopAdjustment);
-                document.removeEventListener('touchcancel', stopAdjustment);
-            };
-            
-            document.addEventListener('touchend', stopAdjustment);
-            document.addEventListener('touchcancel', stopAdjustment);
-        }
-
-        // 處理顏色按鈕觸摸結束事件
-        function handleColorButtonTouchEnd() {
-            clearColorAdjustInterval();
-        }
-
-        // 調整顏色值
-        function adjustColorValue(shift, type, direction) {
-            if (!shift || !type || !direction) return;
-            
-            if (!shiftColors[shift]) {
-                shiftColors[shift] = { r: 128, g: 128, b: 128 };
-            }
-            
-            const currentValue = shiftColors[shift][type];
-            let newValue = currentValue;
-            
-            if (direction === 'up') {
-                newValue = Math.min(255, currentValue + 1);
-            } else if (direction === 'down') {
-                newValue = Math.max(0, currentValue - 1);
-            }
-            
-            // 如果值沒有變化，直接返回
-            if (newValue === currentValue) return;
-            
-            shiftColors[shift][type] = newValue;
-            
-            // 更新輸入框
-            const input = document.querySelector(`.color-input.color-${type}[data-shift="${shift}"]`);
-            if (input) {
-                input.value = newValue;
-            }
-            
-            // 更新顏色預覽並即時更新班表
-            updateColorPreview(shift);
-        }
-
-        // 處理顏色輸入變化
-        function handleColorInputChange(event) {
-            const input = event.target;
-            const shift = input.dataset.shift;
-            const type = input.classList.contains('color-r') ? 'r' : 
-                         input.classList.contains('color-g') ? 'g' : 'b';
-            
-            // 獲取輸入值
-            let value = parseInt(input.value);
-            
-            // 檢查是否為有效數字
-            if (isNaN(value)) {
-                value = 0;
-            }
-            
-            // 確保值在 0-255 範圍內
-            if (value < 0) {
-                value = 0;
-            } else if (value > 255) {
-                value = 255;
-            }
-            
-            // 更新輸入框
-            input.value = value;
-            
-            if (!shiftColors[shift]) {
-                shiftColors[shift] = { r: 128, g: 128, b: 128 };
-            }
-            
-            shiftColors[shift][type] = value;
-            
-            // 更新顏色預覽並即時更新班表
-            updateColorPreview(shift);
-        }
-
-        // 添加輸入框blur事件處理
-        function addColorInputBlurEvent() {
-            const colorInputs = document.querySelectorAll('.color-input');
-            colorInputs.forEach(input => {
-                input.removeEventListener('blur', handleColorInputBlur);
-                input.addEventListener('blur', handleColorInputBlur);
-            });
-        }
-
-        function handleColorInputBlur(event) {
-            const input = event.target;
-            const shift = input.dataset.shift;
-            const type = input.classList.contains('color-r') ? 'r' : 
-                         input.classList.contains('color-g') ? 'g' : 'b';
-            
-            // 獲取輸入值
-            let value = parseInt(input.value);
-            
-            // 檢查是否為有效數字
-            if (isNaN(value)) {
-                value = 128; // 設置為默認值
-            }
-            
-            // 確保值在 0-255 範圍內
-            if (value < 0) {
-                value = 0;
-            } else if (value > 255) {
-                value = 255;
-            }
-            
-            // 更新輸入框
-            input.value = value;
-            
-            if (!shiftColors[shift]) {
-                shiftColors[shift] = { r: 128, g: 128, b: 128 };
-            }
-            
-            shiftColors[shift][type] = value;
-            
-            // 更新顏色預覽並即時更新班表
-            updateColorPreview(shift);
-        }
-
-        // 更新顏色預覽並即時更新班表
-        function updateColorPreview(shift) {
-            if (!shift) return;
-            
-            const color = shiftColors[shift] || { r: 128, g: 128, b: 128 };
-            const preview = document.getElementById(`colorPreview_${shift}`);
-            if (preview) {
-                preview.style.backgroundColor = `rgb(${color.r}, ${color.g}, ${color.b})`;
-            }
-            
-            // 即時儲存顏色設定
-            localStorage.setItem(STORAGE_KEYS.SHIFT_COLORS, JSON.stringify(shiftColors));
-            
-            // 即時更新班表顯示
-            updateScheduleWithNewColors();
-            
-            console.log(`更新 ${shift} 的顏色為 RGB(${color.r}, ${color.g}, ${color.b})`);
-        }
-
-        // 使用新顏色更新班表
-        function updateScheduleWithNewColors() {
-            // 重新繪製週曆
-            const selectedPersonName = document.getElementById('personSelect').value;
-            if (selectedPersonName) {
-                const personData = scheduleData.find(person => person.name === selectedPersonName);
-                if (personData) {
-                    createWeeklyCalendar(personData);
-                    createPersonShiftSummary(personData);
-                    console.log("班表顏色已即時更新");
-                }
-            }
-        }
-
-        // 儲存顏色設定（顯示通知）
-        function saveColorSettings() {
-            localStorage.setItem(STORAGE_KEYS.SHIFT_COLORS, JSON.stringify(shiftColors));
-            alert("顏色設定已儲存！");
-            console.log("顏色設定已儲存到 LocalStorage");
-        }
-
-        // 重設顏色設定到中間值（128,128,128）
-        function resetColorSettings() {
-            if (confirm("確定要重設所有顏色設定為中間值（128,128,128）嗎？")) {
-                // 重置所有顏色為中間值
-                Object.keys(shiftDescriptions).forEach(shift => {
-                    shiftColors[shift] = { r: 128, g: 128, b: 128 };
-                });
-                
-                // 更新顏色設定區域
-                createColorSettings();
-                
-                // 儲存到 LocalStorage
-                localStorage.setItem(STORAGE_KEYS.SHIFT_COLORS, JSON.stringify(shiftColors));
-                
-                // 更新班表
-                updateScheduleWithNewColors();
-                
-                console.log("顏色設定已重設為中間值");
-            }
         }
 
         // 顯示選擇的人員整月班表
@@ -2399,6 +1642,7 @@
             document.getElementById('selectedPersonInfo').style.display = 'block';
             
             document.getElementById('personNameDisplay').textContent = selectedPersonName;
+            document.getElementById('monthDisplay').textContent = `${scheduleYear}年${scheduleMonth}月`;
             document.getElementById('personInfoCard').style.display = 'block';
             document.getElementById('personWeeklyCalendar').style.display = 'block';
             document.getElementById('personShiftSummary').style.display = 'block';
@@ -2406,117 +1650,6 @@
             
             createWeeklyCalendar(personData);
             createPersonShiftSummary(personData);
-        }
-
-        // 建立週曆表格
-        function createWeeklyCalendar(personData) {
-            const weeklyCalendarBody = document.getElementById('weeklyCalendarBody');
-            if (!weeklyCalendarBody) return;
-            
-            weeklyCalendarBody.innerHTML = '';
-            
-            const weeks = [];
-            let currentWeek = [];
-            
-            // 按照日期順序排序
-            const sortedDates = [...allDates].sort((a, b) => a.date - b.date);
-            
-            sortedDates.forEach((dateInfo, index) => {
-                currentWeek.push(dateInfo);
-                
-                if (currentWeek.length === 7 || index === sortedDates.length - 1) {
-                    weeks.push([...currentWeek]);
-                    currentWeek = [];
-                }
-            });
-            
-            // 檢查今天是否在班表中
-            const today = new Date();
-            const todayYear = today.getFullYear();
-            const todayMonth = today.getMonth() + 1;
-            const todayDate = today.getDate();
-            
-            // 確保每一列高度一致
-            weeks.forEach((week, weekIndex) => {
-                const weekRow = document.createElement('div');
-                weekRow.className = 'week-row';
-                
-                // 找出這一週最高高度
-                let maxHeight = 0;
-                week.forEach(dateInfo => {
-                    const dateNumber = dateInfo.date;
-                    const shiftData = personData.shifts[dateNumber];
-                    let cellHeight = 120; // 基本高度
-                    
-                    if (shiftData) {
-                        const shift = shiftData.shift;
-                        const description = shiftDescriptions[shift];
-                        // 如果有班型描述，增加高度
-                        if (description) {
-                            cellHeight += 20;
-                        }
-                    }
-                    
-                    if (cellHeight > maxHeight) {
-                        maxHeight = cellHeight;
-                    }
-                });
-                
-                week.forEach(dateInfo => {
-                    const dateNumber = dateInfo.date;
-                    const shiftData = personData.shifts[dateNumber];
-                    
-                    // 檢查是否為今天
-                    const isToday = (scheduleYear === todayYear && scheduleMonth === todayMonth && dateNumber === todayDate);
-                    
-                    const dayCell = document.createElement('div');
-                    dayCell.className = `day-cell ${dateInfo.dayOfWeek === '六' || dateInfo.dayOfWeek === '日' ? 'weekend' : ''} ${isToday ? 'today' : ''}`;
-                    dayCell.style.minHeight = `${maxHeight}px`;
-                    
-                    const dateDiv = document.createElement('div');
-                    dateDiv.className = 'day-date';
-                    dateDiv.textContent = dateNumber;
-                    
-                    dayCell.appendChild(dateDiv);
-                    
-                    if (shiftData) {
-                        const shift = shiftData.shift;
-                        const originalShift = shiftData.originalShift;
-                        
-                        // 使用自定義顏色
-                        const color = shiftColors[shift] || { r: 128, g: 128, b: 128 };
-                        const backgroundColor = `rgba(${color.r}, ${color.g}, ${color.b}, 0.2)`;
-                        
-                        const shiftDiv = document.createElement('div');
-                        shiftDiv.className = 'day-shift';
-                        shiftDiv.textContent = originalShift || shift;
-                        shiftDiv.style.backgroundColor = backgroundColor;
-                        // 文字顏色已在CSS中統一設定為黑色粗體
-                        
-                        const description = shiftDescriptions[shift];
-                        if (description) {
-                            const timeDiv = document.createElement('div');
-                            timeDiv.className = 'day-shift-time';
-                            timeDiv.textContent = description;
-                            dayCell.appendChild(shiftDiv);
-                            dayCell.appendChild(timeDiv);
-                        } else {
-                            dayCell.appendChild(shiftDiv);
-                        }
-                    } else {
-                        const emptyDiv = document.createElement('div');
-                        emptyDiv.className = 'day-empty';
-                        emptyDiv.textContent = '無資料';
-                        dayCell.appendChild(emptyDiv);
-                    }
-                    
-                    weekRow.appendChild(dayCell);
-                });
-                
-                weeklyCalendarBody.appendChild(weekRow);
-            });
-            
-            console.log("週曆建立完成");
         }
 
         // 建立人員班表統計
@@ -2529,8 +1662,10 @@
             const shiftCounts = {};
             let totalDays = 0;
             
-            allDates.forEach(dateInfo => {
-                const dateNumber = dateInfo.date;
+            // 使用完整的月份日期進行統計
+            const daysInMonth = new Date(scheduleYear, scheduleMonth, 0).getDate();
+            
+            for (let dateNumber = 1; dateNumber <= daysInMonth; dateNumber++) {
                 const shiftData = personData.shifts[dateNumber];
                 
                 if (shiftData) {
@@ -2545,7 +1680,7 @@
                     }
                     shiftCounts[shift].count++;
                 }
-            });
+            }
             
             const sortedShifts = Object.keys(shiftCounts).sort((a, b) => {
                 const isAHoliday = holidayShifts.includes(a) || a === 'Z';
@@ -2604,11 +1739,11 @@
             if (isSummaryCollapsed) {
                 summaryContent.classList.add('collapsed');
                 summaryContent.classList.remove('expanded');
-                toggleBtn.classList.add('collapsed');
+                if (toggleBtn) toggleBtn.classList.add('collapsed');
             } else {
                 summaryContent.classList.remove('collapsed');
                 summaryContent.classList.add('expanded');
-                toggleBtn.classList.remove('collapsed');
+                if (toggleBtn) toggleBtn.classList.remove('collapsed');
             }
         }
         
@@ -2618,24 +1753,6 @@
             updateSummaryCollapse();
         }
         
-        // 切換顏色設定區域顯示
-        function toggleColorSettings() {
-            isColorSettingsVisible = !isColorSettingsVisible;
-            const colorSettingsSection = document.getElementById('colorSettingsSection');
-            const toggleBtn1 = document.getElementById('toggleColorSettingsBtn');
-            const toggleBtn2 = document.getElementById('toggleColorSettingsBtn2');
-            
-            if (isColorSettingsVisible) {
-                colorSettingsSection.style.display = 'block';
-                toggleBtn1.innerHTML = '<i class="bi bi-chevron-up"></i> 隱藏設定';
-                toggleBtn2.innerHTML = '<i class="bi bi-palette"></i> 隱藏顏色設定';
-            } else {
-                colorSettingsSection.style.display = 'none';
-                toggleBtn1.innerHTML = '<i class="bi bi-chevron-down"></i> 顯示設定';
-                toggleBtn2.innerHTML = '<i class="bi bi-palette"></i> 顏色設定';
-            }
-        }
-
         // 複製人員整月班表到剪貼簿
         function copyPersonScheduleToClipboard() {
             const selectedPersonName = document.getElementById('personSelect').value;
@@ -2651,21 +1768,22 @@
             }
             
             let scheduleText = `${selectedPersonName} - ${scheduleYear}年${scheduleMonth}月班表\n\n`;
-            scheduleText += '日期\t班型\t說明\n';
+            scheduleText += '日期\t星期\t班型\t說明\n';
             scheduleText += '------------------------\n';
             
-            // 按照日期順序排序
-            const sortedDates = [...allDates].sort((a, b) => a.date - b.date);
+            // 獲取當月天數
+            const daysInMonth = new Date(scheduleYear, scheduleMonth, 0).getDate();
             
-            sortedDates.forEach(dateInfo => {
-                const dateNumber = dateInfo.date;
+            for (let dateNumber = 1; dateNumber <= daysInMonth; dateNumber++) {
+                const dateObj = new Date(scheduleYear, scheduleMonth - 1, dateNumber);
+                const dayOfWeek = getDayOfWeek(dateObj.getDay());
                 const shiftData = personData.shifts[dateNumber];
                 
                 const shift = shiftData ? shiftData.originalShift || shiftData.shift : '無資料';
                 const description = shiftData ? (shiftDescriptions[shiftData.shift] || '') : '';
                 
-                scheduleText += `${dateNumber}日 (星期${dateInfo.dayOfWeek})\t${shift}\t${description}\n`;
-            });
+                scheduleText += `${dateNumber}日\t星期${dayOfWeek}\t${shift}\t${description}\n`;
+            }
             
             navigator.clipboard.writeText(scheduleText).then(function() {
                 showCopyNotification();
@@ -2683,7 +1801,7 @@
             });
         }
         
-        // 下載班表為圖片 (只下載班表部分)
+        // 下載班表為圖片 - 重新編寫，確保表格對齊
         function downloadScheduleAsImage() {
             const selectedPersonName = document.getElementById('personSelect').value;
             if (!selectedPersonName) {
@@ -2691,41 +1809,196 @@
                 return;
             }
             
+            const personData = scheduleData.find(person => person.name === selectedPersonName);
+            if (!personData) {
+                alert('找不到人員資料');
+                return;
+            }
+            
             showDownloadNotification();
             
-            // 建立只包含班表內容的容器
+            // 建立用於下載的容器
             const downloadContainer = document.createElement('div');
             downloadContainer.style.position = 'fixed';
             downloadContainer.style.left = '-9999px';
             downloadContainer.style.top = '-9999px';
-            downloadContainer.style.width = '800px';
+            downloadContainer.style.width = '1000px';
             downloadContainer.style.backgroundColor = 'white';
-            downloadContainer.style.padding = '20px';
+            downloadContainer.style.padding = '30px';
             downloadContainer.style.borderRadius = '15px';
             downloadContainer.style.boxShadow = '0 5px 15px rgba(0,0,0,0.1)';
             
             // 建立標題
-            const title = document.createElement('h4');
+            const title = document.createElement('h3');
             title.textContent = `${selectedPersonName} - ${scheduleYear}年${scheduleMonth}月班表`;
             title.style.textAlign = 'center';
-            title.style.marginBottom = '20px';
+            title.style.marginBottom = '25px';
             title.style.color = '#4361ee';
+            title.style.fontWeight = 'bold';
+            title.style.fontFamily = "'Microsoft JhengHei', sans-serif";
             downloadContainer.appendChild(title);
             
-            // 複製週曆部分
-            const weeklyCalendar = document.getElementById('weeklyCalendarBody').cloneNode(true);
+            // 建立表格
+            const table = document.createElement('table');
+            table.style.width = '100%';
+            table.style.borderCollapse = 'collapse';
+            table.style.fontFamily = "'Microsoft JhengHei', sans-serif";
+            table.style.border = '1px solid #ddd';
+            table.style.tableLayout = 'fixed'; // 固定表格佈局
             
-            // 調整週曆樣式
-            const weekRows = weeklyCalendar.querySelectorAll('.week-row');
-            weekRows.forEach(row => {
-                const dayCells = row.querySelectorAll('.day-cell');
-                dayCells.forEach(cell => {
-                    cell.style.minHeight = '100px';
-                    cell.style.padding = '8px';
-                });
+            // 建立表頭
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            
+            // 根據選擇的週開始日生成表頭
+            let weekDays = [];
+            if (weekStartDay === 0) {
+                // 週日開始
+                weekDays = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
+            } else {
+                // 週一開始 (預設)
+                weekDays = ['週一', '週二', '週三', '週四', '週五', '週六', '週日'];
+            }
+            
+            weekDays.forEach(dayName => {
+                const th = document.createElement('th');
+                th.textContent = dayName;
+                th.style.padding = '15px 10px';
+                th.style.backgroundColor = '#4361ee';
+                th.style.color = 'white';
+                th.style.fontWeight = 'bold';
+                th.style.textAlign = 'center';
+                th.style.border = '1px solid #ddd';
+                th.style.width = '14.2857%'; // 100% / 7
+                headerRow.appendChild(th);
             });
             
-            downloadContainer.appendChild(weeklyCalendar);
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+            
+            // 建立表格內容
+            const tbody = document.createElement('tbody');
+            
+            // 獲取當月天數
+            const daysInMonth = new Date(scheduleYear, scheduleMonth, 0).getDate();
+            
+            // 獲取當月第一天是星期幾
+            const firstDayOfMonth = new Date(scheduleYear, scheduleMonth - 1, 1).getDay();
+            
+            // 計算第一週前面的空位數
+            let emptyDaysBefore = 0;
+            
+            if (weekStartDay === 0) {
+                // 週日開始
+                emptyDaysBefore = firstDayOfMonth; // 0=週日，1=週一...
+            } else {
+                // 週一開始
+                emptyDaysBefore = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+            }
+            
+            // 計算總共需要多少格子 (7天×6週 = 42個格子)
+            const totalCells = 42;
+            
+            // 創建6行 (6週)
+            for (let week = 0; week < 6; week++) {
+                const row = document.createElement('tr');
+                
+                // 每週7天
+                for (let day = 0; day < 7; day++) {
+                    const cellIndex = week * 7 + day;
+                    
+                    // 計算這個格子的日期
+                    let dateNumber = cellIndex - emptyDaysBefore + 1;
+                    
+                    const td = document.createElement('td');
+                    td.style.padding = '15px 10px';
+                    td.style.height = '120px'; // 固定高度
+                    td.style.width = '14.2857%'; // 固定寬度
+                    td.style.verticalAlign = 'top';
+                    td.style.textAlign = 'center';
+                    td.style.border = '1px solid #ddd';
+                    td.style.boxSizing = 'border-box';
+                    td.style.overflow = 'hidden';
+                    
+                    // 檢查這個日期是否在當月範圍內
+                    if (dateNumber >= 1 && dateNumber <= daysInMonth) {
+                        // 計算這個日期是星期幾
+                        const dateObj = new Date(scheduleYear, scheduleMonth - 1, dateNumber);
+                        const dayOfWeekNum = dateObj.getDay();
+                        
+                        // 檢查是否為週末
+                        const isWeekend = dayOfWeekNum === 0 || dayOfWeekNum === 6;
+                        
+                        if (isWeekend) {
+                            td.style.backgroundColor = '#f8f9ff';
+                        } else {
+                            td.style.backgroundColor = '#ffffff';
+                        }
+                        
+                        // 獲取班表資料
+                        const shiftData = personData.shifts[dateNumber];
+                        
+                        // 日期顯示
+                        const dateDiv = document.createElement('div');
+                        dateDiv.textContent = dateNumber;
+                        dateDiv.style.fontSize = '1.4rem';
+                        dateDiv.style.fontWeight = 'bold';
+                        dateDiv.style.color = '#333';
+                        dateDiv.style.marginBottom = '10px';
+                        td.appendChild(dateDiv);
+                        
+                        if (shiftData) {
+                            const shift = shiftData.shift;
+                            const originalShift = shiftData.originalShift;
+                            
+                            // 使用自定義顏色
+                            const color = shiftColors[shift] || { r: 128, g: 128, b: 128 };
+                            const backgroundColor = `rgba(${color.r}, ${color.g}, ${color.b}, 0.3)`;
+                            
+                            // 設置背景顏色
+                            td.style.backgroundColor = backgroundColor;
+                            
+                            // 班型顯示
+                            const shiftDiv = document.createElement('div');
+                            shiftDiv.textContent = originalShift || shift;
+                            shiftDiv.style.fontSize = '1.2rem';
+                            shiftDiv.style.fontWeight = 'bold';
+                            shiftDiv.style.color = '#4361ee';
+                            shiftDiv.style.marginBottom = '8px';
+                            td.appendChild(shiftDiv);
+                            
+                            // 班型時間說明
+                            const description = shiftDescriptions[shift];
+                            if (description) {
+                                const timeDiv = document.createElement('div');
+                                timeDiv.textContent = description;
+                                timeDiv.style.fontSize = '0.9rem';
+                                timeDiv.style.color = '#666';
+                                td.appendChild(timeDiv);
+                            }
+                        } else {
+                            td.style.backgroundColor = '#f8f9fa';
+                            const emptyDiv = document.createElement('div');
+                            emptyDiv.textContent = '無資料';
+                            emptyDiv.style.color = '#999';
+                            emptyDiv.style.fontStyle = 'italic';
+                            emptyDiv.style.marginTop = '20px';
+                            td.appendChild(emptyDiv);
+                        }
+                    } else {
+                        // 不在當月範圍內的格子 (空白)
+                        td.style.backgroundColor = '#f8f9fa';
+                        td.innerHTML = '<div></div>';
+                    }
+                    
+                    row.appendChild(td);
+                }
+                
+                tbody.appendChild(row);
+            }
+            
+            table.appendChild(tbody);
+            downloadContainer.appendChild(table);
             
             // 添加到頁面
             document.body.appendChild(downloadContainer);
@@ -2735,7 +2008,8 @@
                 scale: 2,
                 useCORS: true,
                 backgroundColor: '#ffffff',
-                logging: false
+                logging: false,
+                allowTaint: true
             }).then(function(canvas) {
                 // 將canvas轉換為圖片
                 const imgData = canvas.toDataURL('image/png');
@@ -2789,8 +2063,8 @@
             hideLoading();
         }
 
-        // 初始化應用程式
-        window.addEventListener('DOMContentLoaded', function() {
+        // 初始化應用程式 - 簡化檔案選擇邏輯
+        document.addEventListener('DOMContentLoaded', function() {
             console.log("DOMContentLoaded: 頁面DOM已載入，開始初始化");
             
             // 檢查是否有儲存的資料
@@ -2803,6 +2077,7 @@
                 
                 updatePersonSelect();
                 createColorSettings();
+                updateWeekStartSelector();
                 document.getElementById('resultSection').style.display = 'block';
                 
                 // 如果有資料，顯示第一個人員的班表
@@ -2813,59 +2088,42 @@
                 }
             }
             
-            // 綁定事件監聽器
-            console.log("綁定事件監聽器");
-            
-            // 選擇檔案按鈕
-            const selectFileBtn = document.getElementById('selectFileBtn');
+            // 簡化檔案選擇邏輯
             const fileInput = document.getElementById('fileInput');
+            const selectFileBtn = document.getElementById('selectFileBtn');
+            const uploadArea = document.getElementById('uploadArea');
             
-            // 修正檔案選擇問題 - 使用更簡單的方式
+            // 單一點擊處理檔案選擇
             if (selectFileBtn) {
-                // 移除舊的事件監聽器
-                selectFileBtn.onclick = null;
-                // 添加新的事件監聽器
                 selectFileBtn.addEventListener('click', function(e) {
-                    console.log("選擇檔案按鈕被點擊");
-                    // 清除可能存在的快速顏色面板
-                    if (activeQuickColorPanel) {
-                        closeQuickColorPanel();
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (fileInput) {
+                        fileInput.click();
                     }
-                    fileInput.click();
                 });
             }
             
-            // 上傳區域點擊事件 - 簡化處理
-            const uploadArea = document.getElementById('uploadArea');
+            // 上傳區域點擊
             if (uploadArea) {
                 uploadArea.addEventListener('click', function(e) {
-                    // 如果點擊的是按鈕區域，不處理
-                    if (e.target.closest('#selectFileBtn')) {
-                        return;
+                    // 避免重複觸發
+                    if (e.target !== selectFileBtn && !selectFileBtn.contains(e.target)) {
+                        if (fileInput) {
+                            fileInput.click();
+                        }
                     }
-                    console.log("上傳區域被點擊");
-                    // 清除可能存在的快速顏色面板
-                    if (activeQuickColorPanel) {
-                        closeQuickColorPanel();
-                    }
-                    fileInput.click();
                 });
             }
             
-            // 檔案輸入事件 - 使用簡單的 change 事件
+            // 檔案選擇處理
             if (fileInput) {
-                // 移除舊的事件監聽器
-                fileInput.onchange = null;
                 fileInput.addEventListener('change', function(e) {
-                    console.log("檔案選擇已改變");
                     const file = e.target.files[0];
                     if (file) {
-                        console.log("已選擇檔案:", file.name);
                         handleFile(file);
-                        // 清除檔案輸入值，以便可以再次選擇同一個檔案
-                        e.target.value = '';
-                    } else {
-                        console.log("未選擇檔案");
+                        // 重置檔案輸入，以便可以再次選擇同一個檔案
+                        this.value = '';
                     }
                 });
             }
@@ -2874,12 +2132,9 @@
             const reuploadBtn = document.getElementById('reuploadBtn');
             if (reuploadBtn) {
                 reuploadBtn.addEventListener('click', function() {
-                    console.log("重新上載按鈕被點擊");
-                    // 清除可能存在的快速顏色面板
-                    if (activeQuickColorPanel) {
-                        closeQuickColorPanel();
+                    if (fileInput) {
+                        fileInput.click();
                     }
-                    fileInput.click();
                 });
             }
             
@@ -2898,11 +2153,6 @@
             const personSelect = document.getElementById('personSelect');
             if (personSelect) {
                 personSelect.addEventListener('change', function() {
-                    console.log("人員選擇變更:", this.value);
-                    // 清除可能存在的快速顏色面板
-                    if (activeQuickColorPanel) {
-                        closeQuickColorPanel();
-                    }
                     showSelectedPersonSchedule();
                 });
             }
@@ -2911,11 +2161,6 @@
             const copyPersonScheduleBtn = document.getElementById('copyPersonScheduleBtn');
             if (copyPersonScheduleBtn) {
                 copyPersonScheduleBtn.addEventListener('click', function() {
-                    console.log("複製按鈕被點擊");
-                    // 清除可能存在的快速顏色面板
-                    if (activeQuickColorPanel) {
-                        closeQuickColorPanel();
-                    }
                     copyPersonScheduleToClipboard();
                 });
             }
@@ -2924,11 +2169,6 @@
             const copyPersonScheduleBtn2 = document.getElementById('copyPersonScheduleBtn2');
             if (copyPersonScheduleBtn2) {
                 copyPersonScheduleBtn2.addEventListener('click', function() {
-                    console.log("第二個複製按鈕被點擊");
-                    // 清除可能存在的快速顏色面板
-                    if (activeQuickColorPanel) {
-                        closeQuickColorPanel();
-                    }
                     copyPersonScheduleToClipboard();
                 });
             }
@@ -2937,11 +2177,6 @@
             const summaryToggleBtn = document.getElementById('summaryToggleBtn');
             if (summaryToggleBtn) {
                 summaryToggleBtn.addEventListener('click', function() {
-                    console.log("統計折疊按鈕被點擊");
-                    // 清除可能存在的快速顏色面板
-                    if (activeQuickColorPanel) {
-                        closeQuickColorPanel();
-                    }
                     toggleSummaryCollapse();
                 });
             }
@@ -2950,11 +2185,6 @@
             const downloadImageBtn = document.getElementById('downloadImageBtn');
             if (downloadImageBtn) {
                 downloadImageBtn.addEventListener('click', function() {
-                    console.log("下載圖片按鈕被點擊");
-                    // 清除可能存在的快速顏色面板
-                    if (activeQuickColorPanel) {
-                        closeQuickColorPanel();
-                    }
                     downloadScheduleAsImage();
                 });
             }
@@ -2963,11 +2193,6 @@
             const toggleColorSettingsBtn = document.getElementById('toggleColorSettingsBtn');
             if (toggleColorSettingsBtn) {
                 toggleColorSettingsBtn.addEventListener('click', function() {
-                    console.log("顏色設定按鈕被點擊");
-                    // 清除可能存在的快速顏色面板
-                    if (activeQuickColorPanel) {
-                        closeQuickColorPanel();
-                    }
                     toggleColorSettings();
                 });
             }
@@ -2976,24 +2201,14 @@
             const toggleColorSettingsBtn2 = document.getElementById('toggleColorSettingsBtn2');
             if (toggleColorSettingsBtn2) {
                 toggleColorSettingsBtn2.addEventListener('click', function() {
-                    console.log("第二個顏色設定按鈕被點擊");
-                    // 清除可能存在的快速顏色面板
-                    if (activeQuickColorPanel) {
-                        closeQuickColorPanel();
-                    }
                     toggleColorSettings();
                 });
             }
             
-            // 儲存設定按鈕（原套用顏色按鈕）
+            // 儲存設定按鈕
             const saveColorsBtn = document.getElementById('saveColorsBtn');
             if (saveColorsBtn) {
                 saveColorsBtn.addEventListener('click', function() {
-                    console.log("儲存設定按鈕被點擊");
-                    // 清除可能存在的快速顏色面板
-                    if (activeQuickColorPanel) {
-                        closeQuickColorPanel();
-                    }
                     saveColorSettings();
                 });
             }
@@ -3002,46 +2217,50 @@
             const resetColorsBtn = document.getElementById('resetColorsBtn');
             if (resetColorsBtn) {
                 resetColorsBtn.addEventListener('click', function() {
-                    console.log("重設顏色按鈕被點擊");
-                    // 清除可能存在的快速顏色面板
-                    if (activeQuickColorPanel) {
-                        closeQuickColorPanel();
-                    }
                     resetColorSettings();
                 });
             }
             
-            // 使用事件委派處理顏色輸入變化
-            const colorSettingsContainer = document.getElementById('colorSettingsContainer');
-            if (colorSettingsContainer) {
-                colorSettingsContainer.addEventListener('input', function(e) {
-                    if (e.target.classList.contains('color-input')) {
-                        handleColorInputChange(e);
-                    }
-                });
-            }
-            
-            // 添加全局點擊事件來關閉快速顏色面板
-            document.addEventListener('click', function(e) {
-                // 如果點擊的不是快速顏色面板或其內部元素，則關閉面板
-                if (activeQuickColorPanel && !activeQuickColorPanel.contains(e.target)) {
-                    // 檢查是否點擊了顏色預覽框
-                    const colorPreview = e.target.closest('.color-preview');
-                    if (!colorPreview) {
-                        closeQuickColorPanel();
-                    }
-                }
-            });
-            
-            // 添加全局按鍵事件，ESC鍵關閉快速顏色面板
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && activeQuickColorPanel) {
-                    closeQuickColorPanel();
-                }
-            });
-            
             console.log("初始化完成，準備使用");
         });
+
+        // 切換顏色設定區域顯示
+        function toggleColorSettings() {
+            isColorSettingsVisible = !isColorSettingsVisible;
+            const colorSettingsSection = document.getElementById('colorSettingsSection');
+            const toggleBtn1 = document.getElementById('toggleColorSettingsBtn');
+            const toggleBtn2 = document.getElementById('toggleColorSettingsBtn2');
+            
+            if (isColorSettingsVisible) {
+                colorSettingsSection.style.display = 'block';
+                if (toggleBtn1) toggleBtn1.innerHTML = '<i class="bi bi-chevron-up"></i> 隱藏設定';
+                if (toggleBtn2) toggleBtn2.innerHTML = '<i class="bi bi-palette"></i> 隱藏顏色設定';
+            } else {
+                colorSettingsSection.style.display = 'none';
+                if (toggleBtn1) toggleBtn1.innerHTML = '<i class="bi bi-chevron-down"></i> 顯示設定';
+                if (toggleBtn2) toggleBtn2.innerHTML = '<i class="bi bi-palette"></i> 顏色設定';
+            }
+        }
+        
+        function saveColorSettings() {
+            localStorage.setItem(STORAGE_KEYS.SHIFT_COLORS, JSON.stringify(shiftColors));
+            alert("顏色設定已儲存！");
+            console.log("顏色設定已儲存到 LocalStorage");
+        }
+        
+        function resetColorSettings() {
+            if (confirm("確定要重設所有顏色設定為中間值（128,128,128）嗎？")) {
+                Object.keys(shiftDescriptions).forEach(shift => {
+                    shiftColors[shift] = { r: 128, g: 128, b: 128 };
+                });
+                
+                createColorSettings();
+                localStorage.setItem(STORAGE_KEYS.SHIFT_COLORS, JSON.stringify(shiftColors));
+                updateScheduleWithNewColors();
+                
+                console.log("顏色設定已重設為中間值");
+            }
+        }
     </script>
 </body>
-</html>
+    </html>
