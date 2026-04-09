@@ -50,9 +50,7 @@
         .copy-notification, .download-notification { position: fixed; bottom: 30px; right: 30px; background-color: #28a745; color: white; padding: 12px 20px; border-radius: 10px; z-index: 1000; opacity: 0; transform: translateY(20px); transition: all 0.3s; }
         .copy-notification.show, .download-notification.show { opacity: 1; transform: translateY(0); }
         @media (max-width: 768px) { .day-cell { height: 90px; } .day-date { font-size: 1.1rem; } .day-shift { font-size: 0.9rem; } }
-        .modal-custom-shift { font-size: 0.9rem; }
         .shift-option-btn { margin: 4px; padding: 6px 12px; }
-        .red-divider-list { border-bottom: 2px solid #ff0000; margin: 8px 0; }
     </style>
 </head>
 <body>
@@ -88,7 +86,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-    // ---------- 班型描述與時間排序 ----------
+    // ---------- 班型定義 ----------
     const shiftDescriptions = {
         'K0': '05:00 ~ 13:00', 'M': '05:30 ~ 13:30', 'M1': '06:00 ~ 14:00', 'M2': '06:30 ~ 14:30', 'M3': '07:00 ~ 15:00',
         'D': '08:00 ~ 16:00', 'D4': '08:00 ~ 16:30', 'D5': '09:00 ~ 17:00', 'D2': '10:00 ~ 18:00', 'D6': '12:00 ~ 20:00',
@@ -96,7 +94,6 @@
         'Z': '例休日', 'R': '休假日', 'GBL': '國定補休', 'L': '國內補休', 'A': '特休假', '公': '公假', '福': '福利假', '體檢': '體檢假'
     };
     const holidayShifts = ['Z','R','GBL','L','A','公','福','體檢'];
-    // 預設顏色 (依照需求)
     const defaultShiftColors = {
         'K0':{r:255,g:255,b:102}, 'M':{r:255,g:255,b:102}, 'M1':{r:255,g:255,b:102}, 'M2':{r:255,g:255,b:102}, 'M3':{r:255,g:255,b:102},
         'D':{r:255,g:107,b:107}, 'D2':{r:255,g:107,b:107}, 'D4':{r:255,g:107,b:107}, 'D5':{r:255,g:107,b:107}, 'D6':{r:255,g:107,b:107},
@@ -104,18 +101,16 @@
         'Z':{r:204,g:255,b:229}, 'R':{r:204,g:255,b:229}, 'GBL':{r:204,g:255,b:229}, 'L':{r:204,g:255,b:229},
         'A':{r:204,g:255,b:229}, '公':{r:204,g:255,b:229}, '福':{r:204,g:255,b:229}, '體檢':{r:204,g:255,b:229}
     };
-    // 特殊班型預設粉紅色
     const SPECIAL_DEFAULT_COLOR = { r: 255, g: 192, b: 203 };
     
     let scheduleData = [], allDates = [], currentFileName = '';
     let shiftColors = { ...defaultShiftColors };
     let scheduleYear = 2025, scheduleMonth = 1, weekStartDay = 1;
     let isSummaryCollapsed = true;
-    let globalSpecialShifts = new Set(); // 所有出現過的特殊班型(跨人員)
+    let globalSpecialShifts = new Set();
     
-    const STORAGE_KEYS = { SCHEDULE_DATA:'scheduleData_v3', ALL_DATES:'allDates_v3', FILE_NAME:'fileName_v3', TIMESTAMP:'ts_v3', SHIFT_COLORS:'shiftColors_v3', WEEK_START_DAY:'weekStartDay_v3', SPECIAL_SHIFTS:'specialShifts_v3' };
+    const STORAGE_KEYS = { SCHEDULE_DATA:'scheduleData_v4', ALL_DATES:'allDates_v4', FILE_NAME:'fileName_v4', TIMESTAMP:'ts_v4', SHIFT_COLORS:'shiftColors_v4', WEEK_START_DAY:'weekStartDay_v4', SPECIAL_SHIFTS:'specialShifts_v4' };
 
-    // 取得班型開始時間(分鐘) 用於排序
     function getShiftStartMinutes(shiftCode) {
         if (holidayShifts.includes(shiftCode)) return 99999;
         const desc = shiftDescriptions[shiftCode];
@@ -124,11 +119,9 @@
             let [hour, minute] = start.split(':').map(Number);
             return hour * 60 + minute;
         }
-        // 特殊班型給予一個較大時間，排在上班組末尾、休假之前
         return 23*60+59;
     }
     
-    // 根據實際出現的班型列表排序 (上班組按時間，休假組最後)
     function getSortedShiftListForPerson(shiftCodesSet) {
         let workShifts = [], holidayList = [];
         for (let s of shiftCodesSet) {
@@ -140,7 +133,6 @@
         return [...workShifts, ...holidayList];
     }
     
-    // 重新整理特殊班型 (全局收集，並為新特殊班型設粉紅色)
     function refreshSpecialShiftsFromData() {
         let found = new Set();
         for (let person of scheduleData) {
@@ -150,17 +142,11 @@
             }
         }
         globalSpecialShifts = found;
-        // 為新特殊班型設定預設粉紅色
         for (let s of globalSpecialShifts) {
-            if (!shiftColors[s]) {
-                shiftColors[s] = { ...SPECIAL_DEFAULT_COLOR };
-            }
+            if (!shiftColors[s]) shiftColors[s] = { ...SPECIAL_DEFAULT_COLOR };
         }
-        // 移除已不存在的特殊班型顏色記錄
         for (let key in shiftColors) {
-            if (!shiftDescriptions[key] && !globalSpecialShifts.has(key)) {
-                delete shiftColors[key];
-            }
+            if (!shiftDescriptions[key] && !globalSpecialShifts.has(key)) delete shiftColors[key];
         }
         localStorage.setItem(STORAGE_KEYS.SPECIAL_SHIFTS, JSON.stringify([...globalSpecialShifts]));
         saveColorSettingsToLocal();
@@ -168,13 +154,11 @@
     
     function saveColorSettingsToLocal() { localStorage.setItem(STORAGE_KEYS.SHIFT_COLORS, JSON.stringify(shiftColors)); }
     
-    // 動態產生顏色設定區域，只顯示當前人員擁有的特殊班型
     function createColorSettingsForPerson(specialShiftsOfCurrentPerson) {
         const container = document.getElementById('colorSettingsContainer');
         if (!container) return;
         container.innerHTML = '';
         
-        // 預定義班型 (全部顯示，按時間排序)
         let predefinedShifts = Object.keys(shiftDescriptions);
         let workPre = predefinedShifts.filter(s => !holidayShifts.includes(s));
         let holidayPre = predefinedShifts.filter(s => holidayShifts.includes(s));
@@ -205,19 +189,15 @@
             }));
         }
         
-        // 預設班型（上班組）
         for (let w of workPre) addShiftItem(w);
-        // 上班組與休假組之間的紅線
         if (workPre.length && holidayPre.length) {
             let hr = document.createElement('hr');
             hr.style.borderTop = '3px solid #ff0000';
             hr.style.margin = '12px 0';
             container.appendChild(hr);
         }
-        // 預設休假班型
         for (let h of holidayPre) addShiftItem(h);
         
-        // 特殊班型部分 (僅當目前人員有特殊班型才顯示)
         if (specialShiftsOfCurrentPerson && specialShiftsOfCurrentPerson.length > 0) {
             let specialHr = document.createElement('hr');
             specialHr.style.borderTop = '3px solid #ff0000';
@@ -227,11 +207,8 @@
             specialTitle.className = 'fw-bold mb-2 text-secondary'; specialTitle.innerText = '✨ 特殊班型 (僅顯示於此人員)';
             container.appendChild(specialTitle);
             let sortedSpecial = [...specialShiftsOfCurrentPerson].sort();
-            for (let sp of sortedSpecial) {
-                addShiftItem(sp, true);
-            }
+            for (let sp of sortedSpecial) addShiftItem(sp, true);
         }
-        
         document.getElementById('colorSettingsSection').style.display = 'block';
     }
     
@@ -240,7 +217,6 @@
         if(selected) showSelectedPersonSchedule();
     }
     
-    // 班表統計 (僅顯示該人員實際出現的班型)
     function createPersonShiftSummary(personData) {
         const container = document.getElementById('shiftSummaryContent');
         if(!container) return;
@@ -264,7 +240,6 @@
         infoDiv.innerHTML = `<strong>📊 上班天數: ${workDays} 天</strong> &nbsp;| <strong>🌙 休假天數: ${holidayDays} 天</strong> &nbsp;| 總天數: ${workDays+holidayDays} 天`;
         container.appendChild(infoDiv);
         
-        // 取得排序後的班型列表 (只針對該人員出現的班型)
         const sortedShifts = getSortedShiftListForPerson(presentShiftsSet);
         let workGroup = sortedShifts.filter(s => !holidayShifts.includes(s));
         let holidayGroup = sortedShifts.filter(s => holidayShifts.includes(s));
@@ -296,7 +271,6 @@
         container.appendChild(totalItem);
     }
     
-    // 週曆繪製
     function createWeeklyCalendar(personData) {
         const tbody = document.getElementById('weeklyCalendarBody');
         if(!tbody) return;
@@ -339,6 +313,7 @@
             tbody.appendChild(row);
         }
     }
+    
     function updateWeekHeaderUI() {
         const thead = document.getElementById('weekHeader');
         if(!thead) return;
@@ -349,7 +324,6 @@
         thead.appendChild(headerRow);
     }
     
-    // 彈窗修改班型 (支援新增特殊班型)
     function openShiftPicker(dateNum, personData) {
         let allPossibleShifts = [...Object.keys(shiftDescriptions), ...globalSpecialShifts];
         allPossibleShifts = [...new Set(allPossibleShifts)];
@@ -368,11 +342,7 @@
             btn.textContent = `${shift} ${shiftDescriptions[shift]||(globalSpecialShifts.has(shift)?'特殊班型':'')}`;
             btn.style.margin = '4px';
             btn.onclick = () => {
-                // 更新班型
-                let newOriginal = shift;
-                let isHoliday = holidayShifts.includes(shift);
-                personData.shifts[dateNum] = { shift: shift, originalShift: shift, isHoliday: isHoliday };
-                // 若班型為特殊且尚未記錄
+                personData.shifts[dateNum] = { shift: shift, originalShift: shift, isHoliday: holidayShifts.includes(shift) };
                 if(!shiftDescriptions[shift] && !globalSpecialShifts.has(shift)) {
                     globalSpecialShifts.add(shift);
                     if(!shiftColors[shift]) shiftColors[shift] = { ...SPECIAL_DEFAULT_COLOR };
@@ -380,7 +350,7 @@
                     saveColorSettingsToLocal();
                 }
                 saveToLocalStorage(scheduleData, allDates, currentFileName);
-                showSelectedPersonSchedule(); // 刷新顯示
+                showSelectedPersonSchedule();
                 bsModal.hide();
                 setTimeout(()=>modalElem.remove(),300);
             };
@@ -406,7 +376,6 @@
         createWeeklyCalendar(person);
         createPersonShiftSummary(person);
         
-        // 動態產生顏色設定區域: 只顯示該人員擁有的特殊班型
         let personSpecialShifts = new Set();
         for (let d in person.shifts) {
             let code = person.shifts[d].shift;
@@ -475,7 +444,25 @@
         html2canvas(container,{scale:2}).then(canvas=>{let link=document.createElement('a'); link.download=`${name}_班表.png`; link.href=canvas.toDataURL(); link.click(); document.body.removeChild(container);}).catch(()=>{alert('下載失敗'); document.body.removeChild(container);});
     }
     
-    // Excel 解析 (保持原有邏輯，並收集特殊班型)
+    // ****** 修正：過濾「星期」等無效名稱 ******
+    function isValidPersonName(name) {
+        if (!name || typeof name !== 'string') return false;
+        let trimmed = name.trim();
+        if (trimmed.length < 2) return false;
+        // 排除常見表頭關鍵字
+        const invalidKeywords = ['姓名', 'Name', '人員', '星期', '週', '週次', '序號', '編號', 'No.', 'NO.', '員工', '人員編號', '日期', 'DAY', 'Day', '天數', '日期/姓名', '日期/人員'];
+        for (let kw of invalidKeywords) {
+            if (trimmed.includes(kw)) return false;
+        }
+        // 排除「星期X」或「週X」
+        if (/^星期[一二三四五六日]$/.test(trimmed)) return false;
+        if (/^週[一二三四五六日]$/.test(trimmed)) return false;
+        // 排除純數字或單一英文字母
+        if (/^\d+$/.test(trimmed)) return false;
+        if (/^[A-Za-z]{1,2}$/.test(trimmed)) return false;
+        return true;
+    }
+    
     function parseWorkbook(workbook, fileName) {
         scheduleData=[]; allDates=[];
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -493,8 +480,8 @@
         allDates.sort((a,b)=>a.date-b.date);
         for(let r=dateRowIdx+1; r<json.length; r++){
             let row=json[r]; if(!row || row.length<3) continue;
-            let name = row[2] ? String(row[2]).trim() : '';
-            if(!name || name.length<2 || ['姓名','Name','人員','日期'].includes(name)) continue;
+            let rawName = row[2] ? String(row[2]).trim() : '';
+            if(!isValidPersonName(rawName)) continue;
             let shifts={};
             let hasData=false;
             for(let dateInfo of allDates){
@@ -504,27 +491,68 @@
                     if(raw.startsWith('=')) continue;
                     let code = raw.split('/')[0].split('／')[0].trim();
                     if(code.endsWith('.')) code=code.slice(0,-1);
+                    if(code === '') continue;
                     let isHoliday = holidayShifts.includes(code) || /休|假|公|福|體/.test(code);
                     shifts[dateInfo.date] = { shift: code, originalShift: raw, isHoliday: isHoliday };
                     hasData=true;
                 }
             }
-            if(hasData) scheduleData.push({name:name, shifts:shifts});
+            if(hasData && Object.keys(shifts).length>0) {
+                scheduleData.push({name:rawName, shifts:shifts});
+            }
         }
-        if(!scheduleData.length) { showError('無效班表資料'); return; }
+        if(!scheduleData.length) { showError('無效班表資料，請確認格式或去除「星期」等無效列'); return; }
         refreshSpecialShiftsFromData();
         saveToLocalStorage(scheduleData, allDates, fileName);
         updatePersonSelect();
-        // 不立刻 createColorSettingsForPerson，等選中人員後再產生
         updateWeekStartSelector();
         hideLoading();
         document.getElementById('fileInfo').style.display='none';
         if(scheduleData.length) { let sel=document.getElementById('personSelect'); sel.selectedIndex=1; showSelectedPersonSchedule(); }
     }
-    function updatePersonSelect() { let sel=document.getElementById('personSelect'); sel.innerHTML='<option value="">請選擇人員</option>'; scheduleData.forEach(p=>{let opt=document.createElement('option'); opt.value=p.name; opt.textContent=p.name; sel.appendChild(opt);}); }
-    function updateWeekStartSelector() { let wSel=document.getElementById('weekStartSelector'); wSel.style.display='block'; let select=document.getElementById('weekStartDaySelect'); select.value=weekStartDay; select.onchange=()=>{weekStartDay=parseInt(select.value); localStorage.setItem(STORAGE_KEYS.WEEK_START_DAY,weekStartDay); showSelectedPersonSchedule();}; }
-    function saveToLocalStorage(sdata,dates,fname){ localStorage.setItem(STORAGE_KEYS.SCHEDULE_DATA,JSON.stringify(sdata)); localStorage.setItem(STORAGE_KEYS.ALL_DATES,JSON.stringify(dates)); localStorage.setItem(STORAGE_KEYS.FILE_NAME,fname); localStorage.setItem(STORAGE_KEYS.TIMESTAMP,Date.now().toString()); saveColorSettingsToLocal(); localStorage.setItem(STORAGE_KEYS.WEEK_START_DAY,weekStartDay); localStorage.setItem(STORAGE_KEYS.SPECIAL_SHIFTS,JSON.stringify([...globalSpecialShifts])); }
-    function loadFromLocalStorage(){ let sData=localStorage.getItem(STORAGE_KEYS.SCHEDULE_DATA); if(!sData) return null; try{ scheduleData=JSON.parse(sData); allDates=JSON.parse(localStorage.getItem(STORAGE_KEYS.ALL_DATES)); currentFileName=localStorage.getItem(STORAGE_KEYS.FILE_NAME)||''; let cols=localStorage.getItem(STORAGE_KEYS.SHIFT_COLORS); if(cols) shiftColors=JSON.parse(cols); let wd=localStorage.getItem(STORAGE_KEYS.WEEK_START_DAY); if(wd) weekStartDay=parseInt(wd); let sp=localStorage.getItem(STORAGE_KEYS.SPECIAL_SHIFTS); if(sp) globalSpecialShifts=new Set(JSON.parse(sp)); for(let s of globalSpecialShifts) if(!shiftColors[s]) shiftColors[s]={...SPECIAL_DEFAULT_COLOR}; return true; }catch(e){return null;} }
+    
+    function updatePersonSelect() { 
+        let sel=document.getElementById('personSelect'); 
+        sel.innerHTML='<option value="">請選擇人員</option>'; 
+        scheduleData.forEach(p=>{let opt=document.createElement('option'); opt.value=p.name; opt.textContent=p.name; sel.appendChild(opt);});
+    }
+    
+    function updateWeekStartSelector() { 
+        let wSel=document.getElementById('weekStartSelector'); 
+        wSel.style.display='block'; 
+        let select=document.getElementById('weekStartDaySelect'); 
+        select.value=weekStartDay; 
+        select.onchange=()=>{weekStartDay=parseInt(select.value); localStorage.setItem(STORAGE_KEYS.WEEK_START_DAY,weekStartDay); showSelectedPersonSchedule();};
+    }
+    
+    function saveToLocalStorage(sdata,dates,fname){ 
+        localStorage.setItem(STORAGE_KEYS.SCHEDULE_DATA,JSON.stringify(sdata)); 
+        localStorage.setItem(STORAGE_KEYS.ALL_DATES,JSON.stringify(dates)); 
+        localStorage.setItem(STORAGE_KEYS.FILE_NAME,fname); 
+        localStorage.setItem(STORAGE_KEYS.TIMESTAMP,Date.now().toString()); 
+        saveColorSettingsToLocal(); 
+        localStorage.setItem(STORAGE_KEYS.WEEK_START_DAY,weekStartDay); 
+        localStorage.setItem(STORAGE_KEYS.SPECIAL_SHIFTS,JSON.stringify([...globalSpecialShifts]));
+    }
+    
+    function loadFromLocalStorage(){ 
+        let sData=localStorage.getItem(STORAGE_KEYS.SCHEDULE_DATA); 
+        if(!sData) return null; 
+        try{ 
+            scheduleData=JSON.parse(sData); 
+            allDates=JSON.parse(localStorage.getItem(STORAGE_KEYS.ALL_DATES)); 
+            currentFileName=localStorage.getItem(STORAGE_KEYS.FILE_NAME)||''; 
+            let cols=localStorage.getItem(STORAGE_KEYS.SHIFT_COLORS); 
+            if(cols) shiftColors=JSON.parse(cols); 
+            let wd=localStorage.getItem(STORAGE_KEYS.WEEK_START_DAY); 
+            if(wd) weekStartDay=parseInt(wd); 
+            let sp=localStorage.getItem(STORAGE_KEYS.SPECIAL_SHIFTS); 
+            if(sp) globalSpecialShifts=new Set(JSON.parse(sp)); 
+            for(let s of globalSpecialShifts) if(!shiftColors[s]) shiftColors[s]={...SPECIAL_DEFAULT_COLOR}; 
+            return true; 
+        }catch(e){return null;} 
+    }
+    
     function clearLocalStorage(){ Object.values(STORAGE_KEYS).forEach(k=>localStorage.removeItem(k)); location.reload(); }
     function showLoading(){ document.getElementById('loadingSpinner').style.display='block'; document.getElementById('resultSection').style.display='none'; }
     function hideLoading(){ document.getElementById('loadingSpinner').style.display='none'; document.getElementById('resultSection').style.display='block'; }
