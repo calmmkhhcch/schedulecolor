@@ -38,7 +38,7 @@
         .summary-content.collapsed { max-height: 0; overflow: hidden; }
         .summary-item { display: flex; justify-content: space-between; padding: 10px 15px; margin-bottom: 6px; background-color: #f8f9fa; border-radius: 8px; border-left: 4px solid #4361ee; }
         .shift-divider-red { border-top: 3px solid #ff4d4d; margin: 12px 0; width: 100%; }
-        .color-settings-section { background-color: white; border-radius: 15px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); margin-bottom: 25px; }
+        .color-settings-section { background-color: white; border-radius: 15px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); margin-bottom: 25px; display: none; } /* 預設隱藏 */
         .color-setting-item { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 12px 15px; margin-bottom: 8px; background-color: #f8f9fa; border-radius: 8px; }
         .shift-label { min-width: 55px; font-weight: 600; }
         .time-label { flex: 2; font-size: 0.85rem; color: #555; }
@@ -66,7 +66,7 @@
     </div></div>
     <div class="loading-spinner" id="loadingSpinner"><div class="spinner-border text-primary"><span class="visually-hidden">載入中...</span></div><h4 class="mt-3">解析班表中...</h4></div>
     <div class="result-section" id="resultSection">
-        <div class="color-settings-section" id="colorSettingsSection" style="display: none;">
+        <div class="color-settings-section" id="colorSettingsSection">
             <div class="d-flex justify-content-between"><h5><i class="bi bi-palette"></i> 班型顏色設定</h5><button class="btn btn-sm btn-outline-secondary" id="toggleColorSettingsBtn"><i class="bi bi-chevron-up"></i> 隱藏</button></div>
             <div id="colorSettingsContainer"></div>
             <div class="mt-2"><button class="btn btn-primary btn-sm" id="saveColorsBtn">儲存</button><button class="btn btn-secondary btn-sm" id="resetColorsBtn">重設預設</button></div>
@@ -209,7 +209,8 @@
             let sortedSpecial = [...specialShiftsOfCurrentPerson].sort();
             for (let sp of sortedSpecial) addShiftItem(sp, true);
         }
-        document.getElementById('colorSettingsSection').style.display = 'block';
+        // 預設隱藏顏色設定面板 (讓使用者手動開啟)
+        document.getElementById('colorSettingsSection').style.display = 'none';
     }
     
     function updateScheduleWithNewColors() { 
@@ -382,6 +383,7 @@
             if (!shiftDescriptions[code]) personSpecialShifts.add(code);
         }
         createColorSettingsForPerson([...personSpecialShifts]);
+        // 注意: createColorSettingsForPerson 已將面板設為隱藏，使用者需手動點按鈕開啟
     }
     
     function copyPersonScheduleToClipboard() {
@@ -444,20 +446,17 @@
         html2canvas(container,{scale:2}).then(canvas=>{let link=document.createElement('a'); link.download=`${name}_班表.png`; link.href=canvas.toDataURL(); link.click(); document.body.removeChild(container);}).catch(()=>{alert('下載失敗'); document.body.removeChild(container);});
     }
     
-    // ****** 修正：過濾「星期」等無效名稱 ******
+    // 過濾無效名稱 (包含「星期」等)
     function isValidPersonName(name) {
         if (!name || typeof name !== 'string') return false;
         let trimmed = name.trim();
         if (trimmed.length < 2) return false;
-        // 排除常見表頭關鍵字
         const invalidKeywords = ['姓名', 'Name', '人員', '星期', '週', '週次', '序號', '編號', 'No.', 'NO.', '員工', '人員編號', '日期', 'DAY', 'Day', '天數', '日期/姓名', '日期/人員'];
         for (let kw of invalidKeywords) {
             if (trimmed.includes(kw)) return false;
         }
-        // 排除「星期X」或「週X」
         if (/^星期[一二三四五六日]$/.test(trimmed)) return false;
         if (/^週[一二三四五六日]$/.test(trimmed)) return false;
-        // 排除純數字或單一英文字母
         if (/^\d+$/.test(trimmed)) return false;
         if (/^[A-Za-z]{1,2}$/.test(trimmed)) return false;
         return true;
@@ -569,12 +568,18 @@
         document.getElementById('copyPersonScheduleBtn2').onclick=copyPersonScheduleToClipboard;
         document.getElementById('downloadImageBtn').onclick=downloadScheduleAsImage;
         document.getElementById('summaryToggleBtn').onclick=()=>{ isSummaryCollapsed=!isSummaryCollapsed; let cont=document.getElementById('shiftSummaryContent'); if(isSummaryCollapsed) cont.classList.add('collapsed'); else cont.classList.remove('collapsed'); };
-        document.getElementById('toggleColorSettingsBtn').onclick=()=>{ let sec=document.getElementById('colorSettingsSection'); sec.style.display=sec.style.display==='none'?'block':'none'; };
-        document.getElementById('toggleColorSettingsBtn2').onclick=()=>{ let sec=document.getElementById('colorSettingsSection'); sec.style.display=sec.style.display==='none'?'block':'none'; };
+        // 顏色設定面板切換 (兩個按鈕)
+        const togglePanel = () => {
+            let panel = document.getElementById('colorSettingsSection');
+            if (panel.style.display === 'none') panel.style.display = 'block';
+            else panel.style.display = 'none';
+        };
+        document.getElementById('toggleColorSettingsBtn').onclick = togglePanel;
+        document.getElementById('toggleColorSettingsBtn2').onclick = togglePanel;
         document.getElementById('saveColorsBtn').onclick=()=>{ saveColorSettingsToLocal(); alert('顏色已儲存'); };
         document.getElementById('resetColorsBtn').onclick=()=>{ if(confirm('重設所有班型顏色為預設值？')){ shiftColors=JSON.parse(JSON.stringify(defaultShiftColors)); for(let s of globalSpecialShifts) shiftColors[s]={...SPECIAL_DEFAULT_COLOR}; saveColorSettingsToLocal(); showSelectedPersonSchedule();} };
         document.getElementById('personSelect').onchange=()=>showSelectedPersonSchedule();
     });
 </script>
 </body>
-    </html>
+</html>
