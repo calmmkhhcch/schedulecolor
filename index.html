@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>班表小助手 - 智慧班表管理</title>
+    <title>班表小助手 - 手機桌布完美適配版</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
-        body { background-color: #f5f7ff; font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; padding-top: 20px; padding-bottom: 50px; user-select: none; }
+        body { background-color: #f5f7ff; font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; padding-top: 20px; padding-bottom: 50px; }
         .card { border-radius: 15px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.08); margin-bottom: 25px; overflow: hidden; }
         .upload-area { text-align: center; padding: 40px 20px; border: 2px dashed #4361ee; border-radius: 12px; background-color: #f8faff; cursor: pointer; transition: all 0.3s ease; }
         .file-input-hidden { display: none; }
@@ -24,12 +24,7 @@
         .person-info-card { background-color: #f8faff; padding: 20px; border-radius: 12px; border-left: 5px solid #4361ee; margin-bottom: 25px; }
         .weekly-calendar { background-color: white; border-radius: 15px; overflow-x: auto; box-shadow: 0 5px 15px rgba(0,0,0,0.08); margin-bottom: 25px; }
         .weekly-calendar-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 700px; }
-        /* 強制所有日期格子寬度一致，解決週五列寬不同的問題 */
-        .weekly-calendar-table th,
-        .weekly-calendar-table td {
-            width: 14.2857% !important;
-            box-sizing: border-box;
-        }
+        .weekly-calendar-table th, .weekly-calendar-table td { width: 14.2857% !important; box-sizing: border-box; }
         .weekly-calendar-header { background-color: #4361ee; color: white; }
         .weekday-header { padding: 15px 5px; text-align: center; border-right: 1px solid rgba(255,255,255,0.2); }
         .day-cell { background-color: #f8f9fa; padding: 8px 5px; height: 120px; vertical-align: top; text-align: center; border: 1px solid #eaeaea; cursor: pointer; transition: all 0.2s; }
@@ -57,11 +52,13 @@
         .copy-notification.show, .download-notification.show { opacity: 1; transform: translateY(0); }
         @media (max-width: 768px) { .day-cell { height: 90px; } .day-date { font-size: 1.1rem; } .day-shift { font-size: 0.9rem; } }
         .shift-option-btn { margin: 4px; padding: 6px 12px; }
+        /* 桌布安全區提示 */
+        .wallpaper-note { font-size: 0.75rem; color: #6c757d; margin-top: 8px; }
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="text-center mb-4"><h1 class="fw-bold text-primary"><i class="bi bi-calendar-check"></i> 班表小助手</h1><p class="text-muted">上傳Excel班表，查詢人員整月班表．點擊日期即可修改班型</p></div>
+    <div class="text-center mb-4"><h1 class="fw-bold text-primary"><i class="bi bi-calendar-check"></i> 班表小助手</h1><p class="text-muted">上傳Excel班表｜點擊修改班型｜生成完美手機桌布（不再被裁切）</p></div>
     <div class="card"><div class="card-body"><h5 class="card-title"><i class="bi bi-upload"></i> 上傳班表檔案</h5>
         <div class="upload-area" id="uploadArea"><div><i class="bi bi-file-earmark-excel" style="font-size: 4rem; color: #4361ee;"></i></div>
         <h4 class="upload-instruction">點擊選擇檔案 上傳班表</h4><p class="text-muted">支援 .xlsx / .xls</p>
@@ -78,25 +75,31 @@
             <div class="mt-2"><button class="btn btn-primary btn-sm" id="saveColorsBtn">儲存</button><button class="btn btn-secondary btn-sm" id="resetColorsBtn">重設預設</button></div>
         </div>
         <div class="week-start-selector mt-2" id="weekStartSelector" style="display: none;"><label>每週第一天</label><select class="form-select w-50" id="weekStartDaySelect"><option value="1">週一</option><option value="0">週日</option></select></div>
-        <div class="person-selector"><h5><i class="bi bi-person-search"></i> 選擇人員</h5><select class="form-select form-select-lg" id="personSelect"><option value="">請選擇人員</option></select><div class="d-flex justify-content-between mt-3 flex-wrap gap-2"><button class="btn btn-outline-secondary" id="reuploadBtn"><i class="bi bi-arrow-clockwise"></i> 重新上載</button><button class="btn btn-outline-primary" id="toggleColorSettingsBtn2"><i class="bi bi-palette"></i> 顏色設定</button><button class="btn btn-outline-danger" id="clearStorageBtn"><i class="bi bi-trash"></i> 清除資料</button></div></div>
+        <div class="person-selector"><h5><i class="bi bi-person-search"></i> 選擇人員</h5><select class="form-select form-select-lg" id="personSelect"><option value="">請選擇人員</option></select><div class="d-flex justify-content-between mt-3 flex-wrap gap-2"><button class="btn btn-outline-secondary" id="reuploadBtn"><i class="bi bi-arrow-clockwise"></i> 重新上載</button><button class="btn btn-outline-primary" id="toggleColorSettingsBtn2"><i class="bi bi-palette"></i> 顏色設定</button><button class="btn btn-outline-danger" id="clearStorageBtn"><i class="bi bi-trash"></i> 清除資料</button></div>
+            <div class="wallpaper-note mt-2"><i class="bi bi-info-circle"></i> 桌布將自動生成標準手機尺寸 (1080x1920)，班表置中，四周留白防裁切。</div>
+        </div>
         <div class="card mt-3"><div class="card-body"><div id="selectedPersonInfo" class="alert alert-info" style="display: none;"></div><div id="personInfoCard" class="person-info-card" style="display: none;"><div class="row"><div class="col-md-8"><h4 id="personNameDisplay"></h4><span id="personCategoryDisplay" class="badge bg-secondary"></span><span id="monthDisplay" class="badge bg-primary ms-2"></span></div><div class="col-md-4 text-md-end"><button class="btn btn-primary" id="copyPersonScheduleBtn"><i class="bi bi-clipboard"></i> 複製班表</button></div></div></div>
             <div id="personWeeklyCalendar" class="weekly-calendar" style="display: none;"><table class="weekly-calendar-table"><thead id="weekHeader" class="weekly-calendar-header"></thead><tbody id="weeklyCalendarBody"></tbody></table></div>
             <div id="personShiftSummary" class="shift-summary-section" style="display: none;"><div class="summary-header" id="summaryToggleBtn"><h5 class="summary-title"><i class="bi bi-bar-chart"></i> 班表統計</h5><button class="btn summary-toggle"><i class="bi bi-chevron-down"></i></button></div><div class="summary-content collapsed" id="shiftSummaryContent"></div></div>
-            <div class="action-buttons" id="actionButtons" style="display: none;"><button class="btn btn-success action-btn" id="downloadImageBtn"><i class="bi bi-image"></i> 下載圖片</button><button class="btn btn-primary action-btn" id="copyPersonScheduleBtn2"><i class="bi bi-clipboard"></i> 複製班表</button></div>
+            <div class="action-buttons" id="actionButtons" style="display: none;">
+                <button class="btn btn-success action-btn" id="downloadImageBtn"><i class="bi bi-image"></i> 下載一般圖片</button>
+                <button class="btn btn-primary action-btn" id="copyPersonScheduleBtn2"><i class="bi bi-clipboard"></i> 複製班表</button>
+                <button class="btn btn-warning action-btn" id="wallpaperBtn"><i class="bi bi-phone"></i> 📱 下載完美手機桌布</button>
+            </div>
         </div></div>
     </div>
 </div>
 <div class="copy-notification" id="copyNotification"><i class="bi bi-check-circle"></i> 已複製</div>
-<div class="download-notification" id="downloadNotification"><i class="bi bi-check-circle"></i> 下載中...</div>
+<div class="download-notification" id="downloadNotification"><i class="bi bi-check-circle"></i> 生成中...</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-    // ---------- 班型定義 ----------
+    // ---------- 班型定義 (保持原樣) ----------
     const shiftDescriptions = {
-        'K0': '05:00 ~ 13:00', 'M': '05:30 ~ 13:30', 'M1': '06:00 ~ 14:00', 'M2': '06:30 ~ 14:30', 'M3': '07:00 ~ 15:00',
-        'D': '08:00 ~ 16:00', 'D4': '08:00 ~ 16:30', 'D5': '09:00 ~ 17:00', 'D2': '10:00 ~ 18:00', 'D6': '12:00 ~ 20:00',
-        'K2': '14:00 ~ 22:00', 'N': '16:00 ~ 24:00', 'K5': '21:00 ~ 05:00', 'K6': '22:00 ~ 06:00',
+        'K0': '05:00~13:00', 'M': '05:30~13:30', 'M1': '06:00~14:00', 'M2': '06:30~14:30', 'M3': '07:00~15:00',
+        'D': '08:00~16:00', 'D4': '08:00~16:30', 'D5': '09:00~17:00', 'D2': '10:00~18:00', 'D6': '12:00~20:00',
+        'K2': '14:00~22:00', 'N': '16:00~24:00', 'K5': '21:00~05:00', 'K6': '22:00~06:00',
         'Z': '例休日', 'R': '休假日', 'GBL': '國定補休', 'L': '國內補休', 'A': '特休假', '公': '公假', '福': '福利假', '體檢': '體檢假'
     };
     const holidayShifts = ['Z','R','GBL','L','A','公','福','體檢'];
@@ -408,7 +411,214 @@
         navigator.clipboard.writeText(lines.join('\n')).then(()=>{document.getElementById('copyNotification').classList.add('show'); setTimeout(()=>document.getElementById('copyNotification').classList.remove('show'),1500);});
     }
     
-    // 下載圖片：修正列寬一致 + 檔名格式 "人名_YYYY年MM月班表.png"
+    // ================= 完美手機桌布生成器 (1080x1920，班表置中，四周留白) =================
+    async function generateMobileWallpaper() {
+        let name = document.getElementById('personSelect').value;
+        if(!name) { alert('請先選擇人員'); return; }
+        let person = scheduleData.find(p=>p.name===name);
+        if(!person) return;
+        
+        const noti = document.getElementById('downloadNotification');
+        noti.classList.add('show');
+        
+        // 步驟1：先產生一個細長的班表卡片 (寬度 320px，內容自適應)
+        const daysInMonth = new Date(scheduleYear, scheduleMonth, 0).getDate();
+        const firstDay = new Date(scheduleYear, scheduleMonth-1, 1).getDay();
+        let startEmpty = (weekStartDay === 0) ? firstDay : (firstDay === 0 ? 6 : firstDay - 1);
+        const weekdaysShort = (weekStartDay===0) ? ['日','一','二','三','四','五','六'] : ['一','二','三','四','五','六','日'];
+        
+        let workDays=0, holidayDays=0;
+        for(let d=1;d<=daysInMonth;d++) {
+            let sd = person.shifts[d];
+            if(sd) holidayShifts.includes(sd.shift) ? holidayDays++ : workDays++;
+        }
+        
+        // 建立卡片容器 (固定寬度 320px)
+        const cardWidth = 320;
+        const cardDiv = document.createElement('div');
+        cardDiv.style.width = `${cardWidth}px`;
+        cardDiv.style.backgroundColor = '#ffffff';
+        cardDiv.style.fontFamily = "'Segoe UI', 'Microsoft JhengHei', sans-serif";
+        cardDiv.style.padding = '24px 16px 32px 16px';
+        cardDiv.style.borderRadius = '32px';
+        cardDiv.style.boxShadow = '0 10px 25px rgba(0,0,0,0.05)';
+        cardDiv.style.color = '#1e2a3e';
+        
+        // 標題
+        const titleDiv = document.createElement('div');
+        titleDiv.style.textAlign = 'center';
+        titleDiv.style.marginBottom = '16px';
+        titleDiv.innerHTML = `<div style="font-size: 22px; font-weight: 800; color: #4361ee;">${name}</div>
+                              <div style="font-size: 13px; font-weight: 500; color: #6c757d; margin-top: 4px;">${scheduleYear}年 ${scheduleMonth}月 班表</div>`;
+        cardDiv.appendChild(titleDiv);
+        
+        // 星期行
+        const weekRow = document.createElement('div');
+        weekRow.style.display = 'grid';
+        weekRow.style.gridTemplateColumns = 'repeat(7, 1fr)';
+        weekRow.style.gap = '3px';
+        weekRow.style.marginBottom = '10px';
+        weekRow.style.textAlign = 'center';
+        weekdaysShort.forEach(day => {
+            const daySpan = document.createElement('div');
+            daySpan.style.fontWeight = 'bold';
+            daySpan.style.fontSize = '11px';
+            daySpan.style.color = '#4361ee';
+            daySpan.style.padding = '4px 0';
+            daySpan.style.backgroundColor = '#f0f3ff';
+            daySpan.style.borderRadius = '12px';
+            daySpan.textContent = day;
+            weekRow.appendChild(daySpan);
+        });
+        cardDiv.appendChild(weekRow);
+        
+        // 月曆網格
+        const grid = document.createElement('div');
+        grid.style.display = 'grid';
+        grid.style.gridTemplateColumns = 'repeat(7, 1fr)';
+        grid.style.gap = '4px';
+        grid.style.marginBottom = '20px';
+        
+        for(let i=0; i<startEmpty; i++) {
+            const emptyCell = document.createElement('div');
+            emptyCell.style.backgroundColor = '#f8f9fa';
+            emptyCell.style.borderRadius = '8px';
+            emptyCell.style.padding = '6px 0';
+            emptyCell.style.textAlign = 'center';
+            emptyCell.style.fontSize = '10px';
+            emptyCell.style.color = '#adb5bd';
+            emptyCell.textContent = '';
+            grid.appendChild(emptyCell);
+        }
+        
+        for(let d=1; d<=daysInMonth; d++) {
+            const shiftData = person.shifts[d];
+            const shiftCode = shiftData ? (shiftData.originalShift || shiftData.shift) : '';
+            const isHoliday = shiftData ? holidayShifts.includes(shiftData.shift) : false;
+            const bgColorObj = shiftData ? (shiftColors[shiftData.shift] || {r:240,g:240,b:240}) : {r:248,g:249,b:250};
+            const bgRgba = `rgba(${bgColorObj.r}, ${bgColorObj.g}, ${bgColorObj.b}, 0.45)`;
+            
+            const cell = document.createElement('div');
+            cell.style.backgroundColor = bgRgba;
+            cell.style.borderRadius = '10px';
+            cell.style.padding = '6px 0 5px 0';
+            cell.style.textAlign = 'center';
+            cell.style.border = '1px solid rgba(0,0,0,0.02)';
+            
+            const dateSpan = document.createElement('div');
+            dateSpan.style.fontSize = '14px';
+            dateSpan.style.fontWeight = '700';
+            dateSpan.style.color = isHoliday ? '#c92a2a' : '#2c3e50';
+            dateSpan.textContent = d;
+            cell.appendChild(dateSpan);
+            
+            if(shiftCode) {
+                const shiftSpan = document.createElement('div');
+                shiftSpan.style.fontSize = '10px';
+                shiftSpan.style.fontWeight = '600';
+                shiftSpan.style.marginTop = '2px';
+                shiftSpan.style.color = '#1e466e';
+                shiftSpan.textContent = shiftCode.length > 5 ? shiftCode.substring(0,5) : shiftCode;
+                cell.appendChild(shiftSpan);
+                if(shiftData && shiftDescriptions[shiftData.shift]) {
+                    const timeSpan = document.createElement('div');
+                    timeSpan.style.fontSize = '7px';
+                    timeSpan.style.color = '#6c757d';
+                    timeSpan.style.marginTop = '1px';
+                    let shortTime = shiftDescriptions[shiftData.shift].replace('~','').substring(0,5);
+                    timeSpan.textContent = shortTime;
+                    cell.appendChild(timeSpan);
+                }
+            } else {
+                const dashSpan = document.createElement('div');
+                dashSpan.style.fontSize = '9px';
+                dashSpan.style.marginTop = '2px';
+                dashSpan.style.color = '#adb5bd';
+                dashSpan.textContent = '—';
+                cell.appendChild(dashSpan);
+            }
+            grid.appendChild(cell);
+        }
+        cardDiv.appendChild(grid);
+        
+        // 統計區塊
+        const statsDiv = document.createElement('div');
+        statsDiv.style.backgroundColor = '#f1f5fe';
+        statsDiv.style.borderRadius = '16px';
+        statsDiv.style.padding = '8px 12px';
+        statsDiv.style.display = 'flex';
+        statsDiv.style.justifyContent = 'space-between';
+        statsDiv.style.fontWeight = '600';
+        statsDiv.style.fontSize = '11px';
+        statsDiv.innerHTML = `
+            <div style="color:#2b6e3c;">📆 上班 ${workDays}天</div>
+            <div style="color:#c92a2a;">🌙 休假 ${holidayDays}天</div>
+            <div style="color:#4361ee;">📅 總日 ${workDays+holidayDays}天</div>
+        `;
+        cardDiv.appendChild(statsDiv);
+        
+        // 底部極小字
+        const footerNote = document.createElement('div');
+        footerNote.style.textAlign = 'center';
+        footerNote.style.fontSize = '6px';
+        footerNote.style.color = '#e9ecef';
+        footerNote.style.marginTop = '12px';
+        footerNote.textContent = '班表小助手';
+        cardDiv.appendChild(footerNote);
+        
+        // 將卡片暫時加入body以進行canvas渲染
+        document.body.appendChild(cardDiv);
+        let cardCanvas;
+        try {
+            cardCanvas = await html2canvas(cardDiv, {
+                scale: 2.5,
+                backgroundColor: '#ffffff',
+                logging: false
+            });
+        } finally {
+            document.body.removeChild(cardDiv);
+        }
+        
+        // 步驟2：創建標準手機桌布畫布 (1080x1920)
+        const wallpaperCanvas = document.createElement('canvas');
+        wallpaperCanvas.width = 1080;
+        wallpaperCanvas.height = 1920;
+        const ctx = wallpaperCanvas.getContext('2d');
+        
+        // 填充背景 (白色)
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, wallpaperCanvas.width, wallpaperCanvas.height);
+        
+        // 計算卡片縮放後的大小 (保持比例，寬度佔畫布的 70% => 756px)
+        const targetCardWidth = wallpaperCanvas.width * 0.70; // 756px
+        const scale = targetCardWidth / cardCanvas.width;
+        const targetCardHeight = cardCanvas.height * scale;
+        
+        // 計算置中座標
+        const x = (wallpaperCanvas.width - targetCardWidth) / 2;
+        const y = (wallpaperCanvas.height - targetCardHeight) / 2;
+        
+        // 繪製卡片 (縮放後)
+        ctx.drawImage(cardCanvas, 0, 0, cardCanvas.width, cardCanvas.height, x, y, targetCardWidth, targetCardHeight);
+        
+        // 可選：添加非常淡的陰影效果 (美化)
+        ctx.shadowBlur = 0;
+        
+        // 轉為PNG並下載
+        wallpaperCanvas.toBlob(blob => {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.download = `${name}_${scheduleYear}年${scheduleMonth}月_桌布.png`;
+            link.href = url;
+            link.click();
+            URL.revokeObjectURL(url);
+            noti.classList.remove('show');
+            setTimeout(() => noti.classList.remove('show'), 500);
+        }, 'image/png');
+        
+        noti.classList.remove('show');
+    }
+    
     function downloadScheduleAsImage() {
         let name = document.getElementById('personSelect').value;
         if(!name) return;
@@ -416,7 +626,6 @@
         container.style.position='fixed'; container.style.left='-9999px'; container.style.top='-9999px';
         container.style.width='1000px'; container.style.backgroundColor='white'; container.style.padding='30px';
         
-        // 加入樣式確保下載表格列寬均等
         const style = document.createElement('style');
         style.textContent = `
             .download-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
@@ -466,7 +675,6 @@
         }
         table.appendChild(tbody); container.appendChild(table);
         document.body.appendChild(container);
-        // 檔名: 人名_2025年03月班表.png
         const fileName = `${name}_${scheduleYear}年${scheduleMonth}月班表.png`;
         html2canvas(container,{scale:2}).then(canvas=>{let link=document.createElement('a'); link.download=fileName; link.href=canvas.toDataURL(); link.click(); document.body.removeChild(container);}).catch(()=>{alert('下載失敗'); document.body.removeChild(container);});
     }
@@ -591,6 +799,7 @@
         document.getElementById('copyPersonScheduleBtn').onclick=copyPersonScheduleToClipboard;
         document.getElementById('copyPersonScheduleBtn2').onclick=copyPersonScheduleToClipboard;
         document.getElementById('downloadImageBtn').onclick=downloadScheduleAsImage;
+        document.getElementById('wallpaperBtn').onclick=generateMobileWallpaper;
         document.getElementById('summaryToggleBtn').onclick=()=>{ isSummaryCollapsed=!isSummaryCollapsed; let cont=document.getElementById('shiftSummaryContent'); if(isSummaryCollapsed) cont.classList.add('collapsed'); else cont.classList.remove('collapsed'); };
         const togglePanel = () => {
             let panel = document.getElementById('colorSettingsSection');
