@@ -3,62 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>班表小助手 - 手機桌布完美適配版</title>
+    <title>班表小助手 - 備註功能｜手機桌布完美版</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
-        body { background-color: #f5f7ff; font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; padding-top: 20px; padding-bottom: 50px; }
-        .card { border-radius: 15px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.08); margin-bottom: 25px; overflow: hidden; }
-        .upload-area { text-align: center; padding: 40px 20px; border: 2px dashed #4361ee; border-radius: 12px; background-color: #f8faff; cursor: pointer; transition: all 0.3s ease; }
+        body { background-color: #fdf8e7; font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; padding-top: 20px; padding-bottom: 50px; }
+        .card { border-radius: 15px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.08); margin-bottom: 25px; overflow: hidden; background-color: #fdf8e7; }
+        .upload-area { text-align: center; padding: 40px 20px; border: 2px dashed #4361ee; border-radius: 12px; background-color: #fdf8e7; cursor: pointer; transition: all 0.3s ease; }
         .file-input-hidden { display: none; }
         #selectFileBtn { background-color: #4361ee; border-color: #4361ee; padding: 12px 30px; border-radius: 10px; }
         .file-btn-text { color: #000000 !important; font-weight: 700 !important; }
         .file-info, .error-message { padding: 10px 15px; border-radius: 8px; margin-top: 15px; }
         .file-info { background-color: #e8f5e8; border-left: 4px solid #28a745; }
         .error-message { background-color: #ffe6e6; color: #dc3545; border-left: 4px solid #dc3545; }
-        .loading-spinner { display: none; text-align: center; padding: 40px; background: white; border-radius: 15px; margin: 20px 0; }
+        .loading-spinner { display: none; text-align: center; padding: 40px; background: #fdf8e7; border-radius: 15px; margin: 20px 0; }
         .result-section { display: none; }
-        .person-selector { background-color: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); margin-bottom: 25px; }
-        .person-selector select { border-radius: 10px; border: 2px solid #e0e0e0; padding: 12px 20px; font-size: 1.1rem; }
-        .person-info-card { background-color: #f8faff; padding: 20px; border-radius: 12px; border-left: 5px solid #4361ee; margin-bottom: 25px; }
-        .weekly-calendar { background-color: white; border-radius: 15px; overflow-x: auto; box-shadow: 0 5px 15px rgba(0,0,0,0.08); margin-bottom: 25px; }
+        .person-selector { background-color: #fdf8e7; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); margin-bottom: 25px; }
+        .person-selector select, .week-start-selector select { background-color: #ffffff !important; border-radius: 10px; border: 2px solid #e0e0e0; padding: 12px 20px; font-size: 1.1rem; }
+        .person-selector .btn-outline-secondary, .person-selector .btn-outline-primary, .person-selector .btn-outline-danger { background-color: #ffffff; }
+        .person-info-card { background-color: #ffffff; padding: 20px; border-radius: 12px; border-left: 5px solid #4361ee; margin-bottom: 25px; }
+        .shift-summary-section { background-color: #ffffff; border-radius: 15px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); margin-bottom: 25px; }
+        .weekly-calendar { background-color: #fdf8e7; border-radius: 15px; overflow-x: auto; box-shadow: 0 5px 15px rgba(0,0,0,0.08); margin-bottom: 25px; }
         .weekly-calendar-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 700px; }
         .weekly-calendar-table th, .weekly-calendar-table td { width: 14.2857% !important; box-sizing: border-box; }
         .weekly-calendar-header { background-color: #4361ee; color: white; }
         .weekday-header { padding: 15px 5px; text-align: center; border-right: 1px solid rgba(255,255,255,0.2); }
-        .day-cell { background-color: #f8f9fa; padding: 8px 5px; height: 120px; vertical-align: top; text-align: center; border: 1px solid #eaeaea; cursor: pointer; transition: all 0.2s; }
-        .day-cell:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); background-color: #fff6e5; }
-        .day-cell.today { border: 2px solid #ff6b6b; background-color: #fff5f5; }
+        .day-cell { background-color: #fff9ef; padding: 8px 5px; height: 120px; vertical-align: top; text-align: center; border: 1px solid #eaeaea; cursor: pointer; transition: all 0.2s; }
+        .day-cell:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); background-color: #fff0d6; }
+        .day-cell.today { border: 2px solid #ff6b6b; background-color: #ffece5; }
         .day-date { font-size: 1.4rem; font-weight: 700; color: #333; margin-bottom: 5px; }
-        .day-shift { font-size: 1.1rem; font-weight: 600; margin-bottom: 5px; word-break: break-word; }
-        .day-shift-time { font-size: 0.75rem; color: #666; }
-        .shift-summary-section { background-color: white; border-radius: 15px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); margin-bottom: 25px; }
+        .day-shift { font-size: 1.1rem; font-weight: 600; margin-bottom: 3px; word-break: break-word; }
+        .day-shift-time { font-size: 0.75rem; color: #666; margin-bottom: 2px; }
+        .day-note { font-size: 0.65rem; color: #2c3e50; background: rgba(0,0,0,0.05); border-radius: 8px; padding: 2px 4px; margin-top: 2px; white-space: normal; word-break: break-word; overflow: hidden; max-height: 2.4em; line-height: 1.2; }
         .summary-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom: 15px; }
         .summary-content { max-height: 600px; overflow-y: auto; transition: max-height 0.3s; }
         .summary-content.collapsed { max-height: 0; overflow: hidden; }
         .summary-item { display: flex; justify-content: space-between; padding: 10px 15px; margin-bottom: 6px; background-color: #f8f9fa; border-radius: 8px; border-left: 4px solid #4361ee; }
-        .shift-divider-red { border-top: 3px solid #ff4d4d; margin: 12px 0; width: 100%; }
-        .color-settings-section { background-color: white; border-radius: 15px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); margin-bottom: 25px; display: none; }
-        .color-setting-item { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 12px 15px; margin-bottom: 8px; background-color: #f8f9fa; border-radius: 8px; }
+        .summary-section-title { font-weight: 700; font-size: 1rem; margin: 10px 0 8px 0; padding-bottom: 4px; border-bottom: 2px solid #4361ee; color: #2c3e50; }
+        .shift-divider-green { border-top: 3px solid #28a745; margin: 12px 0; width: 100%; }
+        .color-settings-section { background-color: #fdf8e7; border-radius: 15px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); margin-bottom: 25px; display: none; }
+        .color-setting-item { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 12px 15px; margin-bottom: 8px; background-color: #fff9ef; border-radius: 8px; }
         .shift-label { min-width: 55px; font-weight: 600; }
         .time-label { flex: 2; font-size: 0.85rem; color: #555; }
         .color-preview { width: 40px; height: 40px; border-radius: 6px; border: 2px solid #ddd; cursor: pointer; }
         .color-input-group { display: flex; gap: 8px; }
-        .color-input { width: 65px; text-align: center; }
+        .color-input { width: 65px; text-align: center; background-color: #fff; }
         .action-buttons { display: flex; gap: 15px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
         .action-btn { padding: 10px 24px; border-radius: 10px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
         .copy-notification, .download-notification { position: fixed; bottom: 30px; right: 30px; background-color: #28a745; color: white; padding: 12px 20px; border-radius: 10px; z-index: 1000; opacity: 0; transform: translateY(20px); transition: all 0.3s; }
         .copy-notification.show, .download-notification.show { opacity: 1; transform: translateY(0); }
-        @media (max-width: 768px) { .day-cell { height: 90px; } .day-date { font-size: 1.1rem; } .day-shift { font-size: 0.9rem; } }
-        .shift-option-btn { margin: 4px; padding: 6px 12px; }
-        /* 桌布安全區提示 */
+        @media (max-width: 768px) { .day-cell { height: 90px; } .day-date { font-size: 1.1rem; } .day-shift { font-size: 0.9rem; } .day-note { font-size: 0.55rem; } }
+        .shift-option-btn { margin: 4px; padding: 6px 12px; background-color: #fff; }
         .wallpaper-note { font-size: 0.75rem; color: #6c757d; margin-top: 8px; }
+        .modal-note-input { width: 100%; margin-top: 15px; padding: 8px; border-radius: 8px; border: 1px solid #ccc; background-color: #fff9ef; }
+        .modal-content { background-color: #fdf8e7; }
+        .modal-header, .modal-footer { border-color: #e0d5b5; }
+        .alert-secondary { background-color: #ffffff !important; border: 1px solid #dee2e6; color: #2c3e50; }
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="text-center mb-4"><h1 class="fw-bold text-primary"><i class="bi bi-calendar-check"></i> 班表小助手</h1><p class="text-muted">上傳Excel班表｜點擊修改班型｜生成完美手機桌布（不再被裁切）</p></div>
+    <div class="text-center mb-4"><h1 class="fw-bold text-primary"><i class="bi bi-calendar-check"></i> 班表小助手</h1><p class="text-muted">上傳Excel班表｜點擊修改班型｜備註功能(30字)</p></div>
     <div class="card"><div class="card-body"><h5 class="card-title"><i class="bi bi-upload"></i> 上傳班表檔案</h5>
         <div class="upload-area" id="uploadArea"><div><i class="bi bi-file-earmark-excel" style="font-size: 4rem; color: #4361ee;"></i></div>
         <h4 class="upload-instruction">點擊選擇檔案 上傳班表</h4><p class="text-muted">支援 .xlsx / .xls</p>
@@ -74,9 +80,9 @@
             <div id="colorSettingsContainer"></div>
             <div class="mt-2"><button class="btn btn-primary btn-sm" id="saveColorsBtn">儲存</button><button class="btn btn-secondary btn-sm" id="resetColorsBtn">重設預設</button></div>
         </div>
-        <div class="week-start-selector mt-2" id="weekStartSelector" style="display: none;"><label>每週第一天</label><select class="form-select w-50" id="weekStartDaySelect"><option value="1">週一</option><option value="0">週日</option></select></div>
+        <div class="week-start-selector mt-2" id="weekStartSelector" style="display: none;"><label>每週第一天</label><select class="form-select w-50" id="weekStartDaySelect"><option value="0">週日</option><option value="1">週一</option></select></div>
         <div class="person-selector"><h5><i class="bi bi-person-search"></i> 選擇人員</h5><select class="form-select form-select-lg" id="personSelect"><option value="">請選擇人員</option></select><div class="d-flex justify-content-between mt-3 flex-wrap gap-2"><button class="btn btn-outline-secondary" id="reuploadBtn"><i class="bi bi-arrow-clockwise"></i> 重新上載</button><button class="btn btn-outline-primary" id="toggleColorSettingsBtn2"><i class="bi bi-palette"></i> 顏色設定</button><button class="btn btn-outline-danger" id="clearStorageBtn"><i class="bi bi-trash"></i> 清除資料</button></div>
-            <div class="wallpaper-note mt-2"><i class="bi bi-info-circle"></i> 桌布將自動生成標準手機尺寸 (1080x1920)，班表置中，四周留白防裁切。</div>
+            <div class="wallpaper-note mt-2"><i class="bi bi-info-circle"></i> 點擊日期可修改班型與備註。備註限制30字，會即時顯示剩餘字數。</div>
         </div>
         <div class="card mt-3"><div class="card-body"><div id="selectedPersonInfo" class="alert alert-info" style="display: none;"></div><div id="personInfoCard" class="person-info-card" style="display: none;"><div class="row"><div class="col-md-8"><h4 id="personNameDisplay"></h4><span id="personCategoryDisplay" class="badge bg-secondary"></span><span id="monthDisplay" class="badge bg-primary ms-2"></span></div><div class="col-md-4 text-md-end"><button class="btn btn-primary" id="copyPersonScheduleBtn"><i class="bi bi-clipboard"></i> 複製班表</button></div></div></div>
             <div id="personWeeklyCalendar" class="weekly-calendar" style="display: none;"><table class="weekly-calendar-table"><thead id="weekHeader" class="weekly-calendar-header"></thead><tbody id="weeklyCalendarBody"></tbody></table></div>
@@ -95,7 +101,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-    // ---------- 班型定義 (保持原樣) ----------
+    // ---------- 班型定義 ----------
     const shiftDescriptions = {
         'K0': '05:00~13:00', 'M': '05:30~13:30', 'M1': '06:00~14:00', 'M2': '06:30~14:30', 'M3': '07:00~15:00',
         'D': '08:00~16:00', 'D4': '08:00~16:30', 'D5': '09:00~17:00', 'D2': '10:00~18:00', 'D6': '12:00~20:00',
@@ -103,6 +109,11 @@
         'Z': '例休日', 'R': '休假日', 'GBL': '國定補休', 'L': '國內補休', 'A': '特休假', '公': '公假', '福': '福利假', '體檢': '體檢假'
     };
     const holidayShifts = ['Z','R','GBL','L','A','公','福','體檢'];
+    // 公司的假 (固定順序: R, Z, GBL)
+    const companyHolidays = ['R', 'Z', 'GBL'];
+    // 自己的假 (其餘休假)
+    const personalHolidays = ['L', 'A', '公', '福', '體檢'];
+    
     const defaultShiftColors = {
         'K0':{r:255,g:255,b:102}, 'M':{r:255,g:255,b:102}, 'M1':{r:255,g:255,b:102}, 'M2':{r:255,g:255,b:102}, 'M3':{r:255,g:255,b:102},
         'D':{r:255,g:107,b:107}, 'D2':{r:255,g:107,b:107}, 'D4':{r:255,g:107,b:107}, 'D5':{r:255,g:107,b:107}, 'D6':{r:255,g:107,b:107},
@@ -114,7 +125,7 @@
     
     let scheduleData = [], allDates = [], currentFileName = '';
     let shiftColors = { ...defaultShiftColors };
-    let scheduleYear = 2025, scheduleMonth = 1, weekStartDay = 1;
+    let scheduleYear = 2025, scheduleMonth = 1, weekStartDay = 0;
     let isSummaryCollapsed = true;
     let globalSpecialShifts = new Set();
     
@@ -226,60 +237,118 @@
         if(selected) showSelectedPersonSchedule();
     }
     
+    // ========== 全新班表統計 (上班班別 / 公司假 / 自己假) ==========
     function createPersonShiftSummary(personData) {
         const container = document.getElementById('shiftSummaryContent');
         if(!container) return;
         container.innerHTML = '';
         const daysInMonth = new Date(scheduleYear, scheduleMonth, 0).getDate();
-        let workDays = 0, holidayDays = 0;
+        
         let shiftCounts = {};
-        let presentShiftsSet = new Set();
+        let workShiftsSet = new Set();      // 上班班別
+        let companyShiftsSet = new Set();   // 公司假
+        let personalShiftsSet = new Set();  // 自己假
+        
         for(let d=1; d<=daysInMonth; d++) {
             let sd = personData.shifts[d];
             if(sd) {
                 let code = sd.shift;
                 shiftCounts[code] = (shiftCounts[code]||0)+1;
-                presentShiftsSet.add(code);
-                if(holidayShifts.includes(code)) holidayDays++;
-                else workDays++;
+                if(holidayShifts.includes(code)) {
+                    if(companyHolidays.includes(code)) companyShiftsSet.add(code);
+                    else personalShiftsSet.add(code);
+                } else {
+                    workShiftsSet.add(code);
+                }
             }
         }
-        let infoDiv = document.createElement('div');
-        infoDiv.className = 'alert alert-secondary p-2 mb-3';
-        infoDiv.innerHTML = `<strong>📊 上班天數: ${workDays} 天</strong> &nbsp;| <strong>🌙 休假天數: ${holidayDays} 天</strong> &nbsp;| 總天數: ${workDays+holidayDays} 天`;
-        container.appendChild(infoDiv);
         
-        const sortedShifts = getSortedShiftListForPerson(presentShiftsSet);
-        let workGroup = sortedShifts.filter(s => !holidayShifts.includes(s));
-        let holidayGroup = sortedShifts.filter(s => holidayShifts.includes(s));
+        // 上班班別排序 (依開始時間)
+        let workShiftsList = Array.from(workShiftsSet);
+        workShiftsList.sort((a,b) => getShiftStartMinutes(a) - getShiftStartMinutes(b));
         
-        function appendShiftItem(shift) {
-            let cnt = shiftCounts[shift] || 0;
+        // 公司假按指定順序顯示
+        let companyList = [];
+        for(let h of companyHolidays) {
+            if(companyShiftsSet.has(h)) companyList.push(h);
+        }
+        // 自己假排序
+        let personalList = Array.from(personalShiftsSet).sort();
+        
+        // 輔助函數：顯示單一項目
+        function appendShiftItem(shift, cnt, showDesc = true) {
             if(cnt===0) return;
             let color = shiftColors[shift] || {r:128,g:128,b:128};
             let item = document.createElement('div');
             item.className = 'summary-item';
             item.style.borderLeftColor = `rgb(${color.r},${color.g},${color.b})`;
             let desc = shiftDescriptions[shift] || (globalSpecialShifts.has(shift) ? '特殊班型' : '');
-            item.innerHTML = `<span class="summary-shift">${shift} ${desc}</span><span class="summary-count">${cnt} 天</span>`;
+            let displayText = showDesc ? `${shift} ${desc}` : shift;
+            item.innerHTML = `<span class="summary-shift">${displayText}</span><span class="summary-count">${cnt} 天</span>`;
             container.appendChild(item);
         }
         
-        for(let w of workGroup) appendShiftItem(w);
-        if(workGroup.length && holidayGroup.length) {
+        // 1. 上班區塊
+        if(workShiftsList.length > 0) {
+            let workTitle = document.createElement('div');
+            workTitle.className = 'summary-section-title';
+            workTitle.innerHTML = '📋 上班：';
+            container.appendChild(workTitle);
+            for(let shift of workShiftsList) {
+                appendShiftItem(shift, shiftCounts[shift], true);
+            }
+        }
+        
+        // 2. 放假區塊 - 公司的假
+        if(companyList.length > 0) {
+            let companyTitle = document.createElement('div');
+            companyTitle.className = 'summary-section-title';
+            companyTitle.innerHTML = '🏢 放假 (公司的假)：';
+            container.appendChild(companyTitle);
+            for(let shift of companyList) {
+                appendShiftItem(shift, shiftCounts[shift], true);
+            }
+        }
+        
+        // 綠線分隔 (公司假與自己假之間)
+        if(companyList.length > 0 && personalList.length > 0) {
             let divider = document.createElement('div');
-            divider.className = 'shift-divider-red';
+            divider.className = 'shift-divider-green';
             container.appendChild(divider);
         }
-        for(let h of holidayGroup) appendShiftItem(h);
         
-        let totalItem = document.createElement('div');
-        totalItem.className = 'summary-item mt-2';
-        totalItem.style.borderTop = '2px solid #4361ee';
-        totalItem.innerHTML = `<span class="summary-shift fw-bold">總計 (上班+休假)</span><span class="summary-count fw-bold">${workDays+holidayDays} 天</span>`;
-        container.appendChild(totalItem);
+        // 3. 放假區塊 - 自己的假
+        if(personalList.length > 0) {
+            let personalTitle = document.createElement('div');
+            personalTitle.className = 'summary-section-title';
+            personalTitle.innerHTML = '👤 放假 (自己的假)：';
+            container.appendChild(personalTitle);
+            for(let shift of personalList) {
+                appendShiftItem(shift, shiftCounts[shift], true);
+            }
+        }
+        
+        // 如果完全沒有任何班型資料
+        if(workShiftsList.length === 0 && companyList.length === 0 && personalList.length === 0) {
+            let emptyMsg = document.createElement('div');
+            emptyMsg.className = 'alert alert-light text-center p-3';
+            emptyMsg.textContent = '暫無班表資料';
+            container.appendChild(emptyMsg);
+        }
+        
+        // 總天數統計
+        let totalDays = 0;
+        for(let cnt of Object.values(shiftCounts)) totalDays += cnt;
+        if(totalDays > 0) {
+            let totalItem = document.createElement('div');
+            totalItem.className = 'summary-item mt-2';
+            totalItem.style.borderTop = '2px solid #4361ee';
+            totalItem.innerHTML = `<span class="summary-shift fw-bold">📅 總計 (上班+休假)</span><span class="summary-count fw-bold">${totalDays} 天</span>`;
+            container.appendChild(totalItem);
+        }
     }
     
+    // 顯示班型與備註 (網頁)
     function createWeeklyCalendar(personData) {
         const tbody = document.getElementById('weeklyCalendarBody');
         if(!tbody) return;
@@ -314,9 +383,13 @@
                             let timeDiv = document.createElement('div'); timeDiv.className='day-shift-time'; timeDiv.textContent=shiftDescriptions[code];
                             td.appendChild(timeDiv);
                         }
-                    } else { td.style.backgroundColor='#f8f9fa'; let emptyDiv=document.createElement('div'); emptyDiv.className='day-empty'; emptyDiv.textContent='-'; td.appendChild(emptyDiv); }
+                        if(shiftData.note && shiftData.note.trim() !== '') {
+                            let noteDiv = document.createElement('div'); noteDiv.className='day-note'; noteDiv.textContent = shiftData.note;
+                            td.appendChild(noteDiv);
+                        }
+                    } else { td.style.backgroundColor='#fff9ef'; let emptyDiv=document.createElement('div'); emptyDiv.className='day-empty'; emptyDiv.textContent='-'; td.appendChild(emptyDiv); }
                     td.addEventListener('click', (e) => { e.stopPropagation(); openShiftPicker(dateNum, personData); });
-                } else { td.classList.add('empty'); td.style.backgroundColor='#f1f3f5'; td.innerHTML='<div></div>'; }
+                } else { td.classList.add('empty'); td.style.backgroundColor='#fdf8e7'; td.innerHTML='<div></div>'; }
                 row.appendChild(td);
             }
             tbody.appendChild(row);
@@ -333,25 +406,40 @@
         thead.appendChild(headerRow);
     }
     
+    // 彈窗：班型選擇 + 備註輸入 (30字限制 + 剩餘字數)
     function openShiftPicker(dateNum, personData) {
         let allPossibleShifts = [...Object.keys(shiftDescriptions), ...globalSpecialShifts];
         allPossibleShifts = [...new Set(allPossibleShifts)];
         let sorted = getSortedShiftListForPerson(new Set(allPossibleShifts));
+        let currentNote = (personData.shifts[dateNum] && personData.shifts[dateNum].note) ? personData.shifts[dateNum].note : '';
+        let maxNoteLength = 30;
+        let remaining = maxNoteLength - currentNote.length;
+        
         let modalHtml = `
-        <div class="modal fade" id="shiftModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">修改 ${scheduleYear}/${scheduleMonth}/${dateNum} 班型</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body" style="max-height:400px;overflow-y:auto;"><div class="d-flex flex-wrap gap-2" id="shiftOptionsContainer"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button></div></div></div></div>`;
+        <div class="modal fade" id="shiftModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">修改 ${scheduleYear}/${scheduleMonth}/${dateNum} 班型與備註</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body" style="max-height:400px;overflow-y:auto;">
+            <div class="d-flex flex-wrap gap-2" id="shiftOptionsContainer"></div>
+            <div class="mt-3"><label class="form-label">備註 (最多${maxNoteLength}字，會顯示在日期格子內)</label>
+            <textarea class="form-control modal-note-input" id="noteInput" rows="2" placeholder="例如：會議、請假、出差..." maxlength="${maxNoteLength}">${escapeHtml(currentNote)}</textarea>
+            <div class="text-end mt-1"><small id="noteRemaining" class="text-muted">剩餘 ${remaining} 字</small></div>
+            </div>
+        </div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button><button type="button" class="btn btn-primary" id="saveNoteBtn">儲存備註</button></div></div></div></div>`;
+        
         let existingModal = document.getElementById('shiftModal');
         if(existingModal) existingModal.remove();
         document.body.insertAdjacentHTML('beforeend', modalHtml);
         let modalElem = document.getElementById('shiftModal');
         let bsModal = new bootstrap.Modal(modalElem);
         let containerDiv = document.getElementById('shiftOptionsContainer');
+        
         sorted.forEach(shift => {
             let btn = document.createElement('button');
             btn.className = 'btn btn-outline-primary btn-sm shift-option-btn';
             btn.textContent = `${shift} ${shiftDescriptions[shift]||(globalSpecialShifts.has(shift)?'特殊班型':'')}`;
             btn.style.margin = '4px';
             btn.onclick = () => {
-                personData.shifts[dateNum] = { shift: shift, originalShift: shift, isHoliday: holidayShifts.includes(shift) };
+                let note = document.getElementById('noteInput').value;
+                if(note.length > maxNoteLength) note = note.substring(0, maxNoteLength);
+                personData.shifts[dateNum] = { shift: shift, originalShift: shift, isHoliday: holidayShifts.includes(shift), note: note };
                 if(!shiftDescriptions[shift] && !globalSpecialShifts.has(shift)) {
                     globalSpecialShifts.add(shift);
                     if(!shiftColors[shift]) shiftColors[shift] = { ...SPECIAL_DEFAULT_COLOR };
@@ -365,8 +453,45 @@
             };
             containerDiv.appendChild(btn);
         });
+        
+        const noteInput = document.getElementById('noteInput');
+        const remainingSpan = document.getElementById('noteRemaining');
+        noteInput.addEventListener('input', function(e) {
+            let val = e.target.value;
+            if(val.length > maxNoteLength) {
+                val = val.substring(0, maxNoteLength);
+                e.target.value = val;
+            }
+            let remain = maxNoteLength - val.length;
+            remainingSpan.textContent = `剩餘 ${remain} 字`;
+        });
+        
+        document.getElementById('saveNoteBtn').onclick = () => {
+            let note = noteInput.value;
+            if(note.length > maxNoteLength) note = note.substring(0, maxNoteLength);
+            if(personData.shifts[dateNum]) {
+                personData.shifts[dateNum].note = note;
+            } else {
+                personData.shifts[dateNum] = { shift: '', originalShift: '', isHoliday: false, note: note };
+            }
+            saveToLocalStorage(scheduleData, allDates, currentFileName);
+            showSelectedPersonSchedule();
+            bsModal.hide();
+            setTimeout(()=>modalElem.remove(),300);
+        };
+        
         bsModal.show();
         modalElem.addEventListener('hidden.bs.modal',()=>{ if(modalElem) modalElem.remove(); });
+    }
+    
+    function escapeHtml(str) {
+        if(!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if(m === '&') return '&amp;';
+            if(m === '<') return '&lt;';
+            if(m === '>') return '&gt;';
+            return m;
+        });
     }
     
     function showSelectedPersonSchedule() {
@@ -381,7 +506,7 @@
         document.getElementById('personInfoCard').style.display='block';
         document.getElementById('personWeeklyCalendar').style.display='block';
         document.getElementById('personShiftSummary').style.display='block';
-        document.getElementById('actionButtons').style.display='flex';
+        document.getElementById('actionButtons').style.display = 'flex';
         createWeeklyCalendar(person);
         createPersonShiftSummary(person);
         
@@ -398,30 +523,122 @@
         if(!name) return;
         let person = scheduleData.find(p=>p.name===name);
         if(!person) return;
-        let lines = [`${name} - ${scheduleYear}年${scheduleMonth}月班表`,'日期\t星期\t班型\t說明'];
+        let lines = [`${name} - ${scheduleYear}年${scheduleMonth}月班表`,'日期\t星期\t班型\t說明\t備註'];
         const daysInMonth = new Date(scheduleYear, scheduleMonth, 0).getDate();
         for(let d=1;d<=daysInMonth;d++) {
             let sd = person.shifts[d];
             let shiftCode = sd?sd.shift:'無';
             let desc = sd? (shiftDescriptions[shiftCode]||'') : '';
+            let note = sd?.note || '';
             let dateObj = new Date(scheduleYear, scheduleMonth-1, d);
             let week = ['日','一','二','三','四','五','六'][dateObj.getDay()];
-            lines.push(`${d}日\t星期${week}\t${shiftCode}\t${desc}`);
+            lines.push(`${d}日\t星期${week}\t${shiftCode}\t${desc}\t${note}`);
         }
         navigator.clipboard.writeText(lines.join('\n')).then(()=>{document.getElementById('copyNotification').classList.add('show'); setTimeout(()=>document.getElementById('copyNotification').classList.remove('show'),1500);});
     }
     
-    // ================= 完美手機桌布生成器 (1080x1920，班表置中，四周留白) =================
+    // 一般圖片下載 (米黃背景)
+    function downloadScheduleAsImage() {
+        let name = document.getElementById('personSelect').value;
+        if(!name) return;
+        let container = document.createElement('div');
+        container.style.position='fixed'; container.style.left='-9999px'; container.style.top='-9999px';
+        container.style.width='1000px';
+        container.style.backgroundColor = '#fdf8e7';
+        container.style.padding = '30px';
+        
+        const style = document.createElement('style');
+        style.textContent = `
+            .download-table { width: 100%; table-layout: fixed; border-collapse: collapse; background-color: #fdf8e7; }
+            .download-table th, .download-table td { width: 14.2857% !important; box-sizing: border-box; }
+            .download-table th { border: 1px solid #ddd; padding: 12px; background-color: #4361ee; color: white; text-align: center; }
+            .download-table td.has-data { border: 1px solid #ddd; padding: 12px; vertical-align: top; text-align: center; background-color: rgba(255,253,235,0.9); }
+            .download-table td.empty-cell { border: none; background-color: #fdf8e7; padding: 12px; }
+            .download-date { font-weight: bold; font-size: 1.2rem; margin-bottom: 5px; }
+            .download-shift { font-weight: 600; }
+            .download-time { font-size: 0.75rem; color: #555; }
+            .download-note { font-size: 0.65rem; color: #2c3e50; background: rgba(0,0,0,0.05); border-radius: 8px; padding: 2px 4px; margin-top: 4px; word-break: break-word; }
+        `;
+        container.appendChild(style);
+        
+        let title = document.createElement('h3'); title.textContent=`${name} - ${scheduleYear}年${scheduleMonth}月班表`; title.style.textAlign='center'; title.style.marginBottom='20px';
+        container.appendChild(title);
+        
+        let table = document.createElement('table'); table.className = 'download-table';
+        let thead = document.createElement('thead'); let tr = document.createElement('tr');
+        let daysHeader = (weekStartDay===0)?['週日','週一','週二','週三','週四','週五','週六']:['週一','週二','週三','週四','週五','週六','週日'];
+        daysHeader.forEach(d=>{let th=document.createElement('th'); th.textContent=d; tr.appendChild(th);});
+        thead.appendChild(tr); table.appendChild(thead);
+        
+        let person = scheduleData.find(p=>p.name===name);
+        let daysInMonth = new Date(scheduleYear, scheduleMonth, 0).getDate();
+        let firstDay = new Date(scheduleYear, scheduleMonth-1, 1).getDay();
+        let emptyBefore = (weekStartDay===0)?firstDay:(firstDay===0?6:firstDay-1);
+        let tbody = document.createElement('tbody');
+        
+        for(let w=0; w<6; w++) {
+            let row = document.createElement('tr');
+            for(let c=0; c<7; c++) {
+                let dateNum = w*7+c - emptyBefore + 1;
+                let td = document.createElement('td');
+                if(dateNum>=1 && dateNum<=daysInMonth) {
+                    td.className = 'has-data';
+                    let dateDiv = document.createElement('div'); dateDiv.className='download-date'; dateDiv.textContent=dateNum;
+                    td.appendChild(dateDiv);
+                    let sd = person.shifts[dateNum];
+                    if(sd) {
+                        let col = shiftColors[sd.shift]||{r:128,g:128,b:128};
+                        td.style.backgroundColor = `rgba(${col.r},${col.g},${col.b},0.25)`;
+                        let shiftDiv = document.createElement('div'); shiftDiv.className='download-shift'; shiftDiv.textContent = sd.originalShift || sd.shift;
+                        td.appendChild(shiftDiv);
+                        if(shiftDescriptions[sd.shift]) {
+                            let timeDiv = document.createElement('div'); timeDiv.className='download-time'; timeDiv.textContent=shiftDescriptions[sd.shift];
+                            td.appendChild(timeDiv);
+                        }
+                        if(sd.note && sd.note.trim() !== '') {
+                            let noteDiv = document.createElement('div'); noteDiv.className='download-note'; noteDiv.textContent = sd.note;
+                            td.appendChild(noteDiv);
+                        }
+                    }
+                } else {
+                    td.className = 'empty-cell';
+                    td.style.backgroundColor = '#fdf8e7';
+                    td.innerHTML = '';
+                }
+                row.appendChild(td);
+            }
+            tbody.appendChild(row);
+        }
+        table.appendChild(tbody); container.appendChild(table);
+        document.body.appendChild(container);
+        const fileName = `${name}_${scheduleYear}年${scheduleMonth}月班表.png`;
+        html2canvas(container, {scale: 2, backgroundColor: '#fdf8e7'}).then(canvas=>{
+            let link=document.createElement('a'); link.download=fileName; link.href=canvas.toDataURL(); link.click();
+            document.body.removeChild(container);
+        }).catch(()=>{alert('下載失敗'); document.body.removeChild(container);});
+    }
+    
+    // 手機桌布生成 (休假日期黑色字，備註顯示，30字限制)
     async function generateMobileWallpaper() {
         let name = document.getElementById('personSelect').value;
         if(!name) { alert('請先選擇人員'); return; }
         let person = scheduleData.find(p=>p.name===name);
         if(!person) return;
         
+        let savedColors = localStorage.getItem(STORAGE_KEYS.SHIFT_COLORS);
+        if (savedColors) {
+            try {
+                let parsed = JSON.parse(savedColors);
+                Object.assign(shiftColors, parsed);
+            } catch(e) {}
+        }
+        for (let s of globalSpecialShifts) {
+            if (!shiftColors[s]) shiftColors[s] = { ...SPECIAL_DEFAULT_COLOR };
+        }
+        
         const noti = document.getElementById('downloadNotification');
         noti.classList.add('show');
         
-        // 步驟1：先產生一個細長的班表卡片 (寬度 320px，內容自適應)
         const daysInMonth = new Date(scheduleYear, scheduleMonth, 0).getDate();
         const firstDay = new Date(scheduleYear, scheduleMonth-1, 1).getDay();
         let startEmpty = (weekStartDay === 0) ? firstDay : (firstDay === 0 ? 6 : firstDay - 1);
@@ -433,18 +650,16 @@
             if(sd) holidayShifts.includes(sd.shift) ? holidayDays++ : workDays++;
         }
         
-        // 建立卡片容器 (固定寬度 320px)
         const cardWidth = 320;
         const cardDiv = document.createElement('div');
         cardDiv.style.width = `${cardWidth}px`;
-        cardDiv.style.backgroundColor = '#ffffff';
+        cardDiv.style.backgroundColor = '#fdf8e7';
         cardDiv.style.fontFamily = "'Segoe UI', 'Microsoft JhengHei', sans-serif";
         cardDiv.style.padding = '24px 16px 32px 16px';
         cardDiv.style.borderRadius = '32px';
         cardDiv.style.boxShadow = '0 10px 25px rgba(0,0,0,0.05)';
         cardDiv.style.color = '#1e2a3e';
         
-        // 標題
         const titleDiv = document.createElement('div');
         titleDiv.style.textAlign = 'center';
         titleDiv.style.marginBottom = '16px';
@@ -452,7 +667,6 @@
                               <div style="font-size: 13px; font-weight: 500; color: #6c757d; margin-top: 4px;">${scheduleYear}年 ${scheduleMonth}月 班表</div>`;
         cardDiv.appendChild(titleDiv);
         
-        // 星期行
         const weekRow = document.createElement('div');
         weekRow.style.display = 'grid';
         weekRow.style.gridTemplateColumns = 'repeat(7, 1fr)';
@@ -472,7 +686,6 @@
         });
         cardDiv.appendChild(weekRow);
         
-        // 月曆網格
         const grid = document.createElement('div');
         grid.style.display = 'grid';
         grid.style.gridTemplateColumns = 'repeat(7, 1fr)';
@@ -481,12 +694,10 @@
         
         for(let i=0; i<startEmpty; i++) {
             const emptyCell = document.createElement('div');
-            emptyCell.style.backgroundColor = '#f8f9fa';
-            emptyCell.style.borderRadius = '8px';
-            emptyCell.style.padding = '6px 0';
-            emptyCell.style.textAlign = 'center';
-            emptyCell.style.fontSize = '10px';
-            emptyCell.style.color = '#adb5bd';
+            emptyCell.style.backgroundColor = '#fdf8e7';
+            emptyCell.style.borderRadius = '0';
+            emptyCell.style.padding = '0';
+            emptyCell.style.height = 'auto';
             emptyCell.textContent = '';
             grid.appendChild(emptyCell);
         }
@@ -508,7 +719,7 @@
             const dateSpan = document.createElement('div');
             dateSpan.style.fontSize = '14px';
             dateSpan.style.fontWeight = '700';
-            dateSpan.style.color = isHoliday ? '#c92a2a' : '#2c3e50';
+            dateSpan.style.color = '#2c3e50';
             dateSpan.textContent = d;
             cell.appendChild(dateSpan);
             
@@ -529,6 +740,20 @@
                     timeSpan.textContent = shortTime;
                     cell.appendChild(timeSpan);
                 }
+                if(shiftData.note && shiftData.note.trim() !== '') {
+                    const noteSpan = document.createElement('div');
+                    noteSpan.style.fontSize = '6px';
+                    noteSpan.style.color = '#2c3e50';
+                    noteSpan.style.backgroundColor = 'rgba(0,0,0,0.05)';
+                    noteSpan.style.borderRadius = '6px';
+                    noteSpan.style.padding = '1px 2px';
+                    noteSpan.style.marginTop = '2px';
+                    noteSpan.style.whiteSpace = 'normal';
+                    noteSpan.style.wordBreak = 'break-word';
+                    let displayNote = shiftData.note.length > 12 ? shiftData.note.substring(0,12)+'…' : shiftData.note;
+                    noteSpan.textContent = displayNote;
+                    cell.appendChild(noteSpan);
+                }
             } else {
                 const dashSpan = document.createElement('div');
                 dashSpan.style.fontSize = '9px';
@@ -541,7 +766,6 @@
         }
         cardDiv.appendChild(grid);
         
-        // 統計區塊
         const statsDiv = document.createElement('div');
         statsDiv.style.backgroundColor = '#f1f5fe';
         statsDiv.style.borderRadius = '16px';
@@ -557,7 +781,6 @@
         `;
         cardDiv.appendChild(statsDiv);
         
-        // 底部極小字
         const footerNote = document.createElement('div');
         footerNote.style.textAlign = 'center';
         footerNote.style.fontSize = '6px';
@@ -566,45 +789,32 @@
         footerNote.textContent = '班表小助手';
         cardDiv.appendChild(footerNote);
         
-        // 將卡片暫時加入body以進行canvas渲染
         document.body.appendChild(cardDiv);
         let cardCanvas;
         try {
             cardCanvas = await html2canvas(cardDiv, {
                 scale: 2.5,
-                backgroundColor: '#ffffff',
+                backgroundColor: '#fdf8e7',
                 logging: false
             });
         } finally {
             document.body.removeChild(cardDiv);
         }
         
-        // 步驟2：創建標準手機桌布畫布 (1080x1920)
         const wallpaperCanvas = document.createElement('canvas');
         wallpaperCanvas.width = 1080;
         wallpaperCanvas.height = 1920;
         const ctx = wallpaperCanvas.getContext('2d');
-        
-        // 填充背景 (白色)
-        ctx.fillStyle = '#ffffff';
+        ctx.fillStyle = '#fdf8e7';
         ctx.fillRect(0, 0, wallpaperCanvas.width, wallpaperCanvas.height);
         
-        // 計算卡片縮放後的大小 (保持比例，寬度佔畫布的 70% => 756px)
-        const targetCardWidth = wallpaperCanvas.width * 0.70; // 756px
+        const targetCardWidth = wallpaperCanvas.width * 0.70;
         const scale = targetCardWidth / cardCanvas.width;
         const targetCardHeight = cardCanvas.height * scale;
-        
-        // 計算置中座標
         const x = (wallpaperCanvas.width - targetCardWidth) / 2;
         const y = (wallpaperCanvas.height - targetCardHeight) / 2;
-        
-        // 繪製卡片 (縮放後)
         ctx.drawImage(cardCanvas, 0, 0, cardCanvas.width, cardCanvas.height, x, y, targetCardWidth, targetCardHeight);
         
-        // 可選：添加非常淡的陰影效果 (美化)
-        ctx.shadowBlur = 0;
-        
-        // 轉為PNG並下載
         wallpaperCanvas.toBlob(blob => {
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -613,72 +823,12 @@
             link.click();
             URL.revokeObjectURL(url);
             noti.classList.remove('show');
-            setTimeout(() => noti.classList.remove('show'), 500);
         }, 'image/png');
         
         noti.classList.remove('show');
     }
     
-    function downloadScheduleAsImage() {
-        let name = document.getElementById('personSelect').value;
-        if(!name) return;
-        let container = document.createElement('div');
-        container.style.position='fixed'; container.style.left='-9999px'; container.style.top='-9999px';
-        container.style.width='1000px'; container.style.backgroundColor='white'; container.style.padding='30px';
-        
-        const style = document.createElement('style');
-        style.textContent = `
-            .download-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-            .download-table th, .download-table td { width: 14.2857% !important; border: 1px solid #ddd; padding: 12px; vertical-align: top; text-align: center; box-sizing: border-box; }
-            .download-table th { background-color: #4361ee; color: white; }
-            .download-date { font-weight: bold; font-size: 1.2rem; margin-bottom: 5px; }
-            .download-shift { font-weight: 600; }
-            .download-time { font-size: 0.75rem; color: #555; }
-        `;
-        container.appendChild(style);
-        
-        let title = document.createElement('h3'); title.textContent=`${name} - ${scheduleYear}年${scheduleMonth}月班表`; title.style.textAlign='center';
-        container.appendChild(title);
-        let table = document.createElement('table'); table.className = 'download-table';
-        let thead = document.createElement('thead'); let tr = document.createElement('tr');
-        let daysHeader = (weekStartDay===0)?['週日','週一','週二','週三','週四','週五','週六']:['週一','週二','週三','週四','週五','週六','週日'];
-        daysHeader.forEach(d=>{let th=document.createElement('th'); th.textContent=d; tr.appendChild(th);});
-        thead.appendChild(tr); table.appendChild(thead);
-        let person = scheduleData.find(p=>p.name===name);
-        let daysInMonth = new Date(scheduleYear, scheduleMonth, 0).getDate();
-        let firstDay = new Date(scheduleYear, scheduleMonth-1, 1).getDay();
-        let emptyBefore = (weekStartDay===0)?firstDay:(firstDay===0?6:firstDay-1);
-        let tbody = document.createElement('tbody');
-        for(let w=0;w<6;w++) {
-            let row = document.createElement('tr');
-            for(let c=0;c<7;c++) {
-                let dateNum = w*7+c - emptyBefore + 1;
-                let td = document.createElement('td');
-                if(dateNum>=1 && dateNum<=daysInMonth) {
-                    let dateDiv = document.createElement('div'); dateDiv.className='download-date'; dateDiv.textContent=dateNum;
-                    td.appendChild(dateDiv);
-                    let sd = person.shifts[dateNum];
-                    if(sd) {
-                        let col = shiftColors[sd.shift]||{r:128,g:128,b:128};
-                        td.style.backgroundColor = `rgba(${col.r},${col.g},${col.b},0.25)`;
-                        let shiftDiv = document.createElement('div'); shiftDiv.className='download-shift'; shiftDiv.textContent = sd.originalShift || sd.shift;
-                        td.appendChild(shiftDiv);
-                        if(shiftDescriptions[sd.shift]) {
-                            let timeDiv = document.createElement('div'); timeDiv.className='download-time'; timeDiv.textContent=shiftDescriptions[sd.shift];
-                            td.appendChild(timeDiv);
-                        }
-                    }
-                } else { td.innerHTML=''; td.style.backgroundColor='#f5f5f5'; }
-                row.appendChild(td);
-            }
-            tbody.appendChild(row);
-        }
-        table.appendChild(tbody); container.appendChild(table);
-        document.body.appendChild(container);
-        const fileName = `${name}_${scheduleYear}年${scheduleMonth}月班表.png`;
-        html2canvas(container,{scale:2}).then(canvas=>{let link=document.createElement('a'); link.download=fileName; link.href=canvas.toDataURL(); link.click(); document.body.removeChild(container);}).catch(()=>{alert('下載失敗'); document.body.removeChild(container);});
-    }
-    
+    // 輔助函數
     function isValidPersonName(name) {
         if (!name || typeof name !== 'string') return false;
         let trimmed = name.trim();
@@ -724,7 +874,7 @@
                     if(code.endsWith('.')) code=code.slice(0,-1);
                     if(code === '') continue;
                     let isHoliday = holidayShifts.includes(code) || /休|假|公|福|體/.test(code);
-                    shifts[dateInfo.date] = { shift: code, originalShift: raw, isHoliday: isHoliday };
+                    shifts[dateInfo.date] = { shift: code, originalShift: raw, isHoliday: isHoliday, note: '' };
                     hasData=true;
                 }
             }
@@ -791,7 +941,21 @@
     function handleFile(file){ if(!file) return; showLoading(); let reader=new FileReader(); reader.onload=e=>{ let wb=XLSX.read(e.target.result,{type:'binary'}); parseWorkbook(wb,file.name); }; reader.readAsBinaryString(file); }
     
     document.addEventListener('DOMContentLoaded',()=>{
-        if(loadFromLocalStorage()){ updatePersonSelect(); updateWeekStartSelector(); document.getElementById('resultSection').style.display='block'; if(scheduleData.length){ let sel=document.getElementById('personSelect'); sel.selectedIndex=1; showSelectedPersonSchedule();} }
+        if(loadFromLocalStorage()){ 
+            updatePersonSelect(); 
+            updateWeekStartSelector(); 
+            document.getElementById('resultSection').style.display='block'; 
+            if(scheduleData.length){ 
+                let sel=document.getElementById('personSelect'); 
+                sel.selectedIndex=1; 
+                showSelectedPersonSchedule();
+            } 
+        } else {
+            weekStartDay = 0;
+            localStorage.setItem(STORAGE_KEYS.WEEK_START_DAY, weekStartDay);
+            let select = document.getElementById('weekStartDaySelect');
+            if(select) select.value = 0;
+        }
         document.getElementById('selectFileBtn').onclick=()=>document.getElementById('fileInput').click();
         document.getElementById('fileInput').onchange=e=>{ if(e.target.files[0]) handleFile(e.target.files[0]); e.target.value=''; };
         document.getElementById('reuploadBtn').onclick=()=>document.getElementById('fileInput').click();
