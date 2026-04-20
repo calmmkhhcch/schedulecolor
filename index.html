@@ -35,7 +35,8 @@
         .day-date { font-size: 1.4rem; font-weight: 700; color: #333; margin-bottom: 5px; }
         .day-shift { font-size: 1.1rem; font-weight: 600; margin-bottom: 3px; word-break: break-word; }
         .day-shift-time { font-size: 0.75rem; color: #666; margin-bottom: 2px; }
-        .day-note { font-size: 0.65rem; color: #2c3e50; background: rgba(0,0,0,0.05); border-radius: 8px; padding: 2px 4px; margin-top: 2px; white-space: normal; word-break: break-word; overflow: hidden; max-height: 2.4em; line-height: 1.2; }
+        /* 備註：背景白色，文字粉紅色 #FF69B4 */
+        .day-note { font-size: 0.65rem; color: #FF69B4; background: #ffffff; border-radius: 8px; padding: 2px 4px; margin-top: 2px; white-space: normal; word-break: break-word; overflow: hidden; max-height: 2.4em; line-height: 1.2; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
         .summary-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom: 15px; }
         .summary-content { max-height: 600px; overflow-y: auto; transition: max-height 0.3s; }
         .summary-content.collapsed { max-height: 0; overflow: hidden; }
@@ -109,9 +110,7 @@
         'Z': '例休日', 'R': '休假日', 'GBL': '國定補休', 'L': '國內補休', 'A': '特休假', '公': '公假', '福': '福利假', '體檢': '體檢假'
     };
     const holidayShifts = ['Z','R','GBL','L','A','公','福','體檢'];
-    // 公司的假 (固定順序: R, Z, GBL)
     const companyHolidays = ['R', 'Z', 'GBL'];
-    // 自己的假 (其餘休假)
     const personalHolidays = ['L', 'A', '公', '福', '體檢'];
     
     const defaultShiftColors = {
@@ -237,7 +236,7 @@
         if(selected) showSelectedPersonSchedule();
     }
     
-    // ========== 全新班表統計 (上班班別 / 公司假 / 自己假) ==========
+    // 班表統計 (上班班別 / 公司假 / 自己假)
     function createPersonShiftSummary(personData) {
         const container = document.getElementById('shiftSummaryContent');
         if(!container) return;
@@ -245,9 +244,9 @@
         const daysInMonth = new Date(scheduleYear, scheduleMonth, 0).getDate();
         
         let shiftCounts = {};
-        let workShiftsSet = new Set();      // 上班班別
-        let companyShiftsSet = new Set();   // 公司假
-        let personalShiftsSet = new Set();  // 自己假
+        let workShiftsSet = new Set();
+        let companyShiftsSet = new Set();
+        let personalShiftsSet = new Set();
         
         for(let d=1; d<=daysInMonth; d++) {
             let sd = personData.shifts[d];
@@ -263,19 +262,15 @@
             }
         }
         
-        // 上班班別排序 (依開始時間)
         let workShiftsList = Array.from(workShiftsSet);
         workShiftsList.sort((a,b) => getShiftStartMinutes(a) - getShiftStartMinutes(b));
         
-        // 公司假按指定順序顯示
         let companyList = [];
         for(let h of companyHolidays) {
             if(companyShiftsSet.has(h)) companyList.push(h);
         }
-        // 自己假排序
         let personalList = Array.from(personalShiftsSet).sort();
         
-        // 輔助函數：顯示單一項目
         function appendShiftItem(shift, cnt, showDesc = true) {
             if(cnt===0) return;
             let color = shiftColors[shift] || {r:128,g:128,b:128};
@@ -288,7 +283,6 @@
             container.appendChild(item);
         }
         
-        // 1. 上班區塊
         if(workShiftsList.length > 0) {
             let workTitle = document.createElement('div');
             workTitle.className = 'summary-section-title';
@@ -299,7 +293,6 @@
             }
         }
         
-        // 2. 放假區塊 - 公司的假
         if(companyList.length > 0) {
             let companyTitle = document.createElement('div');
             companyTitle.className = 'summary-section-title';
@@ -310,14 +303,12 @@
             }
         }
         
-        // 綠線分隔 (公司假與自己假之間)
         if(companyList.length > 0 && personalList.length > 0) {
             let divider = document.createElement('div');
             divider.className = 'shift-divider-green';
             container.appendChild(divider);
         }
         
-        // 3. 放假區塊 - 自己的假
         if(personalList.length > 0) {
             let personalTitle = document.createElement('div');
             personalTitle.className = 'summary-section-title';
@@ -328,7 +319,6 @@
             }
         }
         
-        // 如果完全沒有任何班型資料
         if(workShiftsList.length === 0 && companyList.length === 0 && personalList.length === 0) {
             let emptyMsg = document.createElement('div');
             emptyMsg.className = 'alert alert-light text-center p-3';
@@ -336,7 +326,6 @@
             container.appendChild(emptyMsg);
         }
         
-        // 總天數統計
         let totalDays = 0;
         for(let cnt of Object.values(shiftCounts)) totalDays += cnt;
         if(totalDays > 0) {
@@ -537,7 +526,7 @@
         navigator.clipboard.writeText(lines.join('\n')).then(()=>{document.getElementById('copyNotification').classList.add('show'); setTimeout(()=>document.getElementById('copyNotification').classList.remove('show'),1500);});
     }
     
-    // 一般圖片下載 (米黃背景)
+    // 一般圖片下載 (備註背景白色，文字粉紅色)
     function downloadScheduleAsImage() {
         let name = document.getElementById('personSelect').value;
         if(!name) return;
@@ -557,7 +546,7 @@
             .download-date { font-weight: bold; font-size: 1.2rem; margin-bottom: 5px; }
             .download-shift { font-weight: 600; }
             .download-time { font-size: 0.75rem; color: #555; }
-            .download-note { font-size: 0.65rem; color: #2c3e50; background: rgba(0,0,0,0.05); border-radius: 8px; padding: 2px 4px; margin-top: 4px; word-break: break-word; }
+            .download-note { font-size: 0.65rem; color: #FF69B4; background: #ffffff; border-radius: 8px; padding: 2px 4px; margin-top: 4px; word-break: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
         `;
         container.appendChild(style);
         
@@ -618,7 +607,7 @@
         }).catch(()=>{alert('下載失敗'); document.body.removeChild(container);});
     }
     
-    // 手機桌布生成 (休假日期黑色字，備註顯示，30字限制)
+    // 手機桌布生成 (備註背景白色，文字粉紅色)
     async function generateMobileWallpaper() {
         let name = document.getElementById('personSelect').value;
         if(!name) { alert('請先選擇人員'); return; }
@@ -743,8 +732,8 @@
                 if(shiftData.note && shiftData.note.trim() !== '') {
                     const noteSpan = document.createElement('div');
                     noteSpan.style.fontSize = '6px';
-                    noteSpan.style.color = '#2c3e50';
-                    noteSpan.style.backgroundColor = 'rgba(0,0,0,0.05)';
+                    noteSpan.style.color = '#FF69B4'; // 粉紅色
+                    noteSpan.style.backgroundColor = '#ffffff';
                     noteSpan.style.borderRadius = '6px';
                     noteSpan.style.padding = '1px 2px';
                     noteSpan.style.marginTop = '2px';
