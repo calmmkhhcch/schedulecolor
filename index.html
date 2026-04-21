@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>班表小助手 - 備註功能｜手機桌布完美版</title>
+    <title>班表小助手 - 工時間隔提醒｜備註功能</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -29,14 +29,16 @@
         .weekly-calendar-table th, .weekly-calendar-table td { width: 14.2857% !important; box-sizing: border-box; }
         .weekly-calendar-header { background-color: #4361ee; color: white; }
         .weekday-header { padding: 15px 5px; text-align: center; border-right: 1px solid rgba(255,255,255,0.2); }
-        .day-cell { background-color: #fff9ef; padding: 8px 5px; height: 120px; vertical-align: top; text-align: center; border: 1px solid #eaeaea; cursor: pointer; transition: all 0.2s; }
+        .day-cell { background-color: #fff9ef; padding: 6px 4px; height: 120px; vertical-align: top; text-align: center; border: 1px solid #eaeaea; cursor: pointer; transition: all 0.2s; overflow-y: auto; }
         .day-cell:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); background-color: #fff0d6; }
         .day-cell.today { border: 2px solid #ff6b6b; background-color: #ffece5; }
-        .day-date { font-size: 1.4rem; font-weight: 700; color: #333; margin-bottom: 5px; }
-        .day-shift { font-size: 1.1rem; font-weight: 600; margin-bottom: 3px; word-break: break-word; }
-        .day-shift-time { font-size: 0.75rem; color: #666; margin-bottom: 2px; }
-        /* 備註：背景白色，文字粉紅色 #FF69B4 */
-        .day-note { font-size: 0.65rem; color: #FF69B4; background: #ffffff; border-radius: 8px; padding: 2px 4px; margin-top: 2px; white-space: normal; word-break: break-word; overflow: hidden; max-height: 2.4em; line-height: 1.2; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .day-date { font-size: 1.2rem; font-weight: 700; color: #333; margin-bottom: 4px; }
+        .day-shift { font-size: 0.9rem; font-weight: 600; margin-bottom: 2px; word-break: break-word; }
+        .day-shift-time { font-size: 0.7rem; color: #666; margin-bottom: 2px; }
+        .day-note { font-size: 0.6rem; color: #FF69B4; background: #ffffff; border-radius: 6px; padding: 1px 3px; margin-top: 2px; white-space: normal; word-break: break-word; overflow: hidden; max-height: 2.2em; line-height: 1.2; }
+        .interval-warning-green, .interval-warning-red { font-size: 0.55rem; line-height: 1.2; background: rgba(0,0,0,0.05); border-radius: 6px; padding: 2px 3px; margin-top: 2px; white-space: normal; word-break: break-word; display: inline-block; max-width: 100%; }
+        .interval-warning-green { color: #2e7d32; background: rgba(46,125,50,0.1); }
+        .interval-warning-red { color: #d32f2f; background: rgba(211,47,47,0.1); }
         .summary-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom: 15px; }
         .summary-content { max-height: 600px; overflow-y: auto; transition: max-height 0.3s; }
         .summary-content.collapsed { max-height: 0; overflow: hidden; }
@@ -54,25 +56,48 @@
         .action-btn { padding: 10px 24px; border-radius: 10px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
         .copy-notification, .download-notification { position: fixed; bottom: 30px; right: 30px; background-color: #28a745; color: white; padding: 12px 20px; border-radius: 10px; z-index: 1000; opacity: 0; transform: translateY(20px); transition: all 0.3s; }
         .copy-notification.show, .download-notification.show { opacity: 1; transform: translateY(0); }
-        @media (max-width: 768px) { .day-cell { height: 90px; } .day-date { font-size: 1.1rem; } .day-shift { font-size: 0.9rem; } .day-note { font-size: 0.55rem; } }
+        @media (max-width: 768px) { 
+            .day-cell { height: 90px; padding: 4px 2px; }
+            .day-date { font-size: 1rem; }
+            .day-shift { font-size: 0.8rem; }
+            .day-shift-time { font-size: 0.6rem; }
+            .day-note { font-size: 0.5rem; }
+            .interval-warning-green, .interval-warning-red { font-size: 0.45rem; padding: 1px 2px; }
+        }
         .shift-option-btn { margin: 4px; padding: 6px 12px; background-color: #fff; }
         .wallpaper-note { font-size: 0.75rem; color: #6c757d; margin-top: 8px; }
         .modal-note-input { width: 100%; margin-top: 15px; padding: 8px; border-radius: 8px; border: 1px solid #ccc; background-color: #fff9ef; }
         .modal-content { background-color: #fdf8e7; }
         .modal-header, .modal-footer { border-color: #e0d5b5; }
         .alert-secondary { background-color: #ffffff !important; border: 1px solid #dee2e6; color: #2c3e50; }
+        .feature-note { background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; font-size: 0.85rem; }
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="text-center mb-4"><h1 class="fw-bold text-primary"><i class="bi bi-calendar-check"></i> 班表小助手</h1><p class="text-muted">上傳Excel班表｜點擊修改班型｜備註功能(30字)</p></div>
+    <div class="text-center mb-4"><h1 class="fw-bold text-primary"><i class="bi bi-calendar-check"></i> 班表小助手</h1><p class="text-muted">上傳Excel班表｜點擊修改班型｜自動檢測工時間隔</p></div>
+    
+    <div class="feature-note">
+        <i class="bi bi-info-circle-fill text-warning"></i> <strong>功能說明：</strong><br>
+        • <strong>班表統計</strong>：自動分類「上班班別」、「公司的假(R/Z/GBL)」、「自己的假(其餘休假)」，並以<strong class="text-success">綠線分隔</strong>，各分類後方顯示總天數。<br>
+        • <strong>備註功能</strong>：點擊日期格子可新增備註（粉紅字白底），限制30字，即時顯示剩餘字數。<br>
+        • <strong>工時間隔提醒</strong>：<br>
+          - <span class="text-success">綠色提示</span>：連續兩天班型相同，顯示「～ HH:MM 前需下班」，計算方式為當天正常下班+4小時。<br>
+          - <span class="text-danger">紅色提示</span>：連續兩天班型不同，顯示「～ MM/DD HH:MM 前須下班」，確保隔日上班前有11小時休息。<br>
+        • <strong>手機桌布</strong>：一鍵下載1080x1920標準桌布，班表居中，四周米黃背景防裁切。<br>
+        • <strong>顏色自訂</strong>：可修改各班型背景色，儲存後會套用於網頁、下載圖片及桌布。
+    </div>
+    
     <div class="card"><div class="card-body"><h5 class="card-title"><i class="bi bi-upload"></i> 上傳班表檔案</h5>
-        <div class="upload-area" id="uploadArea"><div><i class="bi bi-file-earmark-excel" style="font-size: 4rem; color: #4361ee;"></i></div>
-        <h4 class="upload-instruction">點擊選擇檔案 上傳班表</h4><p class="text-muted">支援 .xlsx / .xls</p>
-        <input type="file" id="fileInput" class="file-input-hidden" accept=".xlsx,.xls,.xlsm">
-        <button class="btn btn-primary btn-lg" id="selectFileBtn"><i class="bi bi-folder2-open"></i> <span class="file-btn-text">選擇檔案</span></button>
-        <div id="fileInfo" class="file-info mt-3" style="display: none;"><i class="bi bi-check-circle text-success"></i><span id="fileName"></span></div>
-        <div id="errorMessage" class="error-message" style="display: none;"></div></div>
+        <div class="upload-area" id="uploadArea">
+            <div><i class="bi bi-file-earmark-excel" style="font-size: 4rem; color: #4361ee;"></i></div>
+            <h4 class="upload-instruction">點擊選擇檔案 上傳班表</h4>
+            <p class="text-muted">支援 .xlsx / .xls</p>
+            <input type="file" id="fileInput" class="file-input-hidden" accept=".xlsx,.xls,.xlsm">
+            <button class="btn btn-primary btn-lg" id="selectFileBtn"><i class="bi bi-folder2-open"></i> <span class="file-btn-text">選擇檔案</span></button>
+            <div id="fileInfo" class="file-info mt-3" style="display: none;"><i class="bi bi-check-circle text-success"></i><span id="fileName"></span></div>
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+        </div>
     </div></div>
     <div class="loading-spinner" id="loadingSpinner"><div class="spinner-border text-primary"><span class="visually-hidden">載入中...</span></div><h4 class="mt-3">解析班表中...</h4></div>
     <div class="result-section" id="resultSection">
@@ -83,7 +108,7 @@
         </div>
         <div class="week-start-selector mt-2" id="weekStartSelector" style="display: none;"><label>每週第一天</label><select class="form-select w-50" id="weekStartDaySelect"><option value="0">週日</option><option value="1">週一</option></select></div>
         <div class="person-selector"><h5><i class="bi bi-person-search"></i> 選擇人員</h5><select class="form-select form-select-lg" id="personSelect"><option value="">請選擇人員</option></select><div class="d-flex justify-content-between mt-3 flex-wrap gap-2"><button class="btn btn-outline-secondary" id="reuploadBtn"><i class="bi bi-arrow-clockwise"></i> 重新上載</button><button class="btn btn-outline-primary" id="toggleColorSettingsBtn2"><i class="bi bi-palette"></i> 顏色設定</button><button class="btn btn-outline-danger" id="clearStorageBtn"><i class="bi bi-trash"></i> 清除資料</button></div>
-            <div class="wallpaper-note mt-2"><i class="bi bi-info-circle"></i> 點擊日期可修改班型與備註。備註限制30字，會即時顯示剩餘字數。</div>
+            <div class="wallpaper-note mt-2"><i class="bi bi-info-circle"></i> 點擊日期可修改班型與備註。綠色為加班4小時提醒，紅色為11小時間隔提醒。</div>
         </div>
         <div class="card mt-3"><div class="card-body"><div id="selectedPersonInfo" class="alert alert-info" style="display: none;"></div><div id="personInfoCard" class="person-info-card" style="display: none;"><div class="row"><div class="col-md-8"><h4 id="personNameDisplay"></h4><span id="personCategoryDisplay" class="badge bg-secondary"></span><span id="monthDisplay" class="badge bg-primary ms-2"></span></div><div class="col-md-4 text-md-end"><button class="btn btn-primary" id="copyPersonScheduleBtn"><i class="bi bi-clipboard"></i> 複製班表</button></div></div></div>
             <div id="personWeeklyCalendar" class="weekly-calendar" style="display: none;"><table class="weekly-calendar-table"><thead id="weekHeader" class="weekly-calendar-header"></thead><tbody id="weeklyCalendarBody"></tbody></table></div>
@@ -130,6 +155,75 @@
     
     const STORAGE_KEYS = { SCHEDULE_DATA:'scheduleData_v4', ALL_DATES:'allDates_v4', FILE_NAME:'fileName_v4', TIMESTAMP:'ts_v4', SHIFT_COLORS:'shiftColors_v4', WEEK_START_DAY:'weekStartDay_v4', SPECIAL_SHIFTS:'specialShifts_v4' };
 
+    // ========== 輔助函數 ==========
+    function getShiftTimeMinutes(shiftCode, type) {
+        const desc = shiftDescriptions[shiftCode];
+        if (!desc || !desc.includes('~')) return null;
+        let timeStr = desc.split('~')[type === 'start' ? 0 : 1].trim();
+        let [hour, minute] = timeStr.split(':').map(Number);
+        let minutes = hour * 60 + minute;
+        if (type === 'end') {
+            let start = getShiftTimeMinutes(shiftCode, 'start');
+            if (start !== null && minutes < start) minutes += 1440;
+        }
+        return minutes;
+    }
+    
+    // 核心函數：返回警示物件 { text, class }
+    function getIntervalWarning(prevDate, prevShiftCode, nextDate, nextShiftCode, year, month) {
+        if (!prevShiftCode || !nextShiftCode) return null;
+        if (holidayShifts.includes(prevShiftCode) || holidayShifts.includes(nextShiftCode)) return null;
+        
+        const prevStart = getShiftTimeMinutes(prevShiftCode, 'start');
+        const prevEnd = getShiftTimeMinutes(prevShiftCode, 'end');
+        const nextStart = getShiftTimeMinutes(nextShiftCode, 'start');
+        if (prevStart === null || prevEnd === null || nextStart === null) return null;
+        
+        // 判斷班型是否相同（直接比較代碼）
+        const isSameShift = (prevShiftCode === nextShiftCode);
+        
+        let targetTime, targetDateObj, warningText, cssClass;
+        
+        if (isSameShift) {
+            // 相同班型：最多加班4小時，即正常下班時間（上班時間+8小時）+4小時
+            let normalEnd = prevStart + 8 * 60;
+            let maxEnd = normalEnd + 4 * 60;
+            targetTime = maxEnd;
+            targetDateObj = new Date(year, month-1, prevDate);
+            if (targetTime >= 1440) {
+                targetTime -= 1440;
+                targetDateObj.setDate(targetDateObj.getDate() + 1);
+            }
+            let targetHour = Math.floor(targetTime / 60);
+            let targetMin = targetTime % 60;
+            let targetDateStr = `${targetDateObj.getMonth()+1}/${targetDateObj.getDate()}`;
+            let timeStr = `${targetHour.toString().padStart(2,'0')}:${targetMin.toString().padStart(2,'0')}`;
+            // 移除「（最多加班4h）」文字
+            warningText = `～ ${targetDateStr} ${timeStr} 前需下班`;
+            cssClass = 'interval-warning-green';
+        } else {
+            // 不同班型：必須滿足11小時間隔
+            let requiredPrevEnd = nextStart - 11 * 60;
+            let targetDateOffset = 0;
+            if (requiredPrevEnd < 0) {
+                requiredPrevEnd += 1440;
+                targetDateOffset = -1;
+            }
+            targetDateObj = new Date(year, month-1, nextDate);
+            if (targetDateOffset === -1) {
+                targetDateObj.setDate(targetDateObj.getDate() - 1);
+            }
+            let targetHour = Math.floor(requiredPrevEnd / 60) % 24;
+            let targetMin = requiredPrevEnd % 60;
+            let targetDateStr = `${targetDateObj.getMonth()+1}/${targetDateObj.getDate()}`;
+            let timeStr = `${targetHour.toString().padStart(2,'0')}:${targetMin.toString().padStart(2,'0')}`;
+            warningText = `～ ${targetDateStr} ${timeStr} 前須下班`;
+            cssClass = 'interval-warning-red';
+        }
+        
+        return { text: warningText, cssClass: cssClass };
+    }
+    
     function getShiftStartMinutes(shiftCode) {
         if (holidayShifts.includes(shiftCode)) return 99999;
         const desc = shiftDescriptions[shiftCode];
@@ -177,13 +271,11 @@
         const container = document.getElementById('colorSettingsContainer');
         if (!container) return;
         container.innerHTML = '';
-        
         let predefinedShifts = Object.keys(shiftDescriptions);
         let workPre = predefinedShifts.filter(s => !holidayShifts.includes(s));
         let holidayPre = predefinedShifts.filter(s => holidayShifts.includes(s));
         workPre.sort((a,b) => getShiftStartMinutes(a) - getShiftStartMinutes(b));
         holidayPre.sort();
-        
         function addShiftItem(shift, isSpecial = false) {
             const color = shiftColors[shift] || { r:128,g:128,b:128 };
             const desc = shiftDescriptions[shift] || (isSpecial ? '特殊班型' : '');
@@ -207,7 +299,6 @@
                 updateScheduleWithNewColors();
             }));
         }
-        
         for (let w of workPre) addShiftItem(w);
         if (workPre.length && holidayPre.length) {
             let hr = document.createElement('hr');
@@ -216,7 +307,6 @@
             container.appendChild(hr);
         }
         for (let h of holidayPre) addShiftItem(h);
-        
         if (specialShiftsOfCurrentPerson && specialShiftsOfCurrentPerson.length > 0) {
             let specialHr = document.createElement('hr');
             specialHr.style.borderTop = '3px solid #ff0000';
@@ -266,10 +356,15 @@
         workShiftsList.sort((a,b) => getShiftStartMinutes(a) - getShiftStartMinutes(b));
         
         let companyList = [];
-        for(let h of companyHolidays) {
-            if(companyShiftsSet.has(h)) companyList.push(h);
-        }
+        for(let h of companyHolidays) if(companyShiftsSet.has(h)) companyList.push(h);
         let personalList = Array.from(personalShiftsSet).sort();
+        
+        let workTotal = 0;
+        for(let shift of workShiftsList) workTotal += shiftCounts[shift];
+        let companyTotal = 0;
+        for(let shift of companyList) companyTotal += shiftCounts[shift];
+        let personalTotal = 0;
+        for(let shift of personalList) personalTotal += shiftCounts[shift];
         
         function appendShiftItem(shift, cnt, showDesc = true) {
             if(cnt===0) return;
@@ -286,7 +381,7 @@
         if(workShiftsList.length > 0) {
             let workTitle = document.createElement('div');
             workTitle.className = 'summary-section-title';
-            workTitle.innerHTML = '📋 上班：';
+            workTitle.innerHTML = `📋 上班：共 ${workTotal} 天`;
             container.appendChild(workTitle);
             for(let shift of workShiftsList) {
                 appendShiftItem(shift, shiftCounts[shift], true);
@@ -296,7 +391,7 @@
         if(companyList.length > 0) {
             let companyTitle = document.createElement('div');
             companyTitle.className = 'summary-section-title';
-            companyTitle.innerHTML = '🏢 放假 (公司的假)：';
+            companyTitle.innerHTML = `🏢 放假 (公司的假)：共 ${companyTotal} 天`;
             container.appendChild(companyTitle);
             for(let shift of companyList) {
                 appendShiftItem(shift, shiftCounts[shift], true);
@@ -312,7 +407,7 @@
         if(personalList.length > 0) {
             let personalTitle = document.createElement('div');
             personalTitle.className = 'summary-section-title';
-            personalTitle.innerHTML = '👤 放假 (自己的假)：';
+            personalTitle.innerHTML = `👤 放假 (自己的假)：共 ${personalTotal} 天`;
             container.appendChild(personalTitle);
             for(let shift of personalList) {
                 appendShiftItem(shift, shiftCounts[shift], true);
@@ -326,8 +421,7 @@
             container.appendChild(emptyMsg);
         }
         
-        let totalDays = 0;
-        for(let cnt of Object.values(shiftCounts)) totalDays += cnt;
+        let totalDays = workTotal + companyTotal + personalTotal;
         if(totalDays > 0) {
             let totalItem = document.createElement('div');
             totalItem.className = 'summary-item mt-2';
@@ -337,7 +431,7 @@
         }
     }
     
-    // 顯示班型與備註 (網頁)
+    // 顯示班型與備註 + 間隔警告 (網頁)
     function createWeeklyCalendar(personData) {
         const tbody = document.getElementById('weeklyCalendarBody');
         if(!tbody) return;
@@ -376,9 +470,30 @@
                             let noteDiv = document.createElement('div'); noteDiv.className='day-note'; noteDiv.textContent = shiftData.note;
                             td.appendChild(noteDiv);
                         }
-                    } else { td.style.backgroundColor='#fff9ef'; let emptyDiv=document.createElement('div'); emptyDiv.className='day-empty'; emptyDiv.textContent='-'; td.appendChild(emptyDiv); }
+                        let nextDate = dateNum + 1;
+                        if (nextDate <= daysInMonth) {
+                            let nextShiftData = personData.shifts[nextDate];
+                            if (nextShiftData && !holidayShifts.includes(nextShiftData.shift) && !holidayShifts.includes(code)) {
+                                let warningObj = getIntervalWarning(dateNum, code, nextDate, nextShiftData.shift, scheduleYear, scheduleMonth);
+                                if (warningObj) {
+                                    let warnSpan = document.createElement('div');
+                                    warnSpan.className = warningObj.cssClass;
+                                    warnSpan.textContent = warningObj.text;
+                                    td.appendChild(warnSpan);
+                                }
+                            }
+                        }
+                    } else { 
+                        td.style.backgroundColor='#fff9ef'; 
+                        let emptyDiv=document.createElement('div'); emptyDiv.className='day-empty'; emptyDiv.textContent='-'; 
+                        td.appendChild(emptyDiv); 
+                    }
                     td.addEventListener('click', (e) => { e.stopPropagation(); openShiftPicker(dateNum, personData); });
-                } else { td.classList.add('empty'); td.style.backgroundColor='#fdf8e7'; td.innerHTML='<div></div>'; }
+                } else { 
+                    td.classList.add('empty'); 
+                    td.style.backgroundColor='#fdf8e7'; 
+                    td.innerHTML='<div></div>'; 
+                }
                 row.appendChild(td);
             }
             tbody.appendChild(row);
@@ -395,7 +510,6 @@
         thead.appendChild(headerRow);
     }
     
-    // 彈窗：班型選擇 + 備註輸入 (30字限制 + 剩餘字數)
     function openShiftPicker(dateNum, personData) {
         let allPossibleShifts = [...Object.keys(shiftDescriptions), ...globalSpecialShifts];
         allPossibleShifts = [...new Set(allPossibleShifts)];
@@ -403,7 +517,6 @@
         let currentNote = (personData.shifts[dateNum] && personData.shifts[dateNum].note) ? personData.shifts[dateNum].note : '';
         let maxNoteLength = 30;
         let remaining = maxNoteLength - currentNote.length;
-        
         let modalHtml = `
         <div class="modal fade" id="shiftModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">修改 ${scheduleYear}/${scheduleMonth}/${dateNum} 班型與備註</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body" style="max-height:400px;overflow-y:auto;">
             <div class="d-flex flex-wrap gap-2" id="shiftOptionsContainer"></div>
@@ -412,14 +525,12 @@
             <div class="text-end mt-1"><small id="noteRemaining" class="text-muted">剩餘 ${remaining} 字</small></div>
             </div>
         </div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button><button type="button" class="btn btn-primary" id="saveNoteBtn">儲存備註</button></div></div></div></div>`;
-        
         let existingModal = document.getElementById('shiftModal');
         if(existingModal) existingModal.remove();
         document.body.insertAdjacentHTML('beforeend', modalHtml);
         let modalElem = document.getElementById('shiftModal');
         let bsModal = new bootstrap.Modal(modalElem);
         let containerDiv = document.getElementById('shiftOptionsContainer');
-        
         sorted.forEach(shift => {
             let btn = document.createElement('button');
             btn.className = 'btn btn-outline-primary btn-sm shift-option-btn';
@@ -442,7 +553,6 @@
             };
             containerDiv.appendChild(btn);
         });
-        
         const noteInput = document.getElementById('noteInput');
         const remainingSpan = document.getElementById('noteRemaining');
         noteInput.addEventListener('input', function(e) {
@@ -454,7 +564,6 @@
             let remain = maxNoteLength - val.length;
             remainingSpan.textContent = `剩餘 ${remain} 字`;
         });
-        
         document.getElementById('saveNoteBtn').onclick = () => {
             let note = noteInput.value;
             if(note.length > maxNoteLength) note = note.substring(0, maxNoteLength);
@@ -468,7 +577,6 @@
             bsModal.hide();
             setTimeout(()=>modalElem.remove(),300);
         };
-        
         bsModal.show();
         modalElem.addEventListener('hidden.bs.modal',()=>{ if(modalElem) modalElem.remove(); });
     }
@@ -498,7 +606,6 @@
         document.getElementById('actionButtons').style.display = 'flex';
         createWeeklyCalendar(person);
         createPersonShiftSummary(person);
-        
         let personSpecialShifts = new Set();
         for (let d in person.shifts) {
             let code = person.shifts[d].shift;
@@ -526,7 +633,6 @@
         navigator.clipboard.writeText(lines.join('\n')).then(()=>{document.getElementById('copyNotification').classList.add('show'); setTimeout(()=>document.getElementById('copyNotification').classList.remove('show'),1500);});
     }
     
-    // 一般圖片下載 (備註背景白色，文字粉紅色)
     function downloadScheduleAsImage() {
         let name = document.getElementById('personSelect').value;
         if(!name) return;
@@ -535,7 +641,6 @@
         container.style.width='1000px';
         container.style.backgroundColor = '#fdf8e7';
         container.style.padding = '30px';
-        
         const style = document.createElement('style');
         style.textContent = `
             .download-table { width: 100%; table-layout: fixed; border-collapse: collapse; background-color: #fdf8e7; }
@@ -547,24 +652,22 @@
             .download-shift { font-weight: 600; }
             .download-time { font-size: 0.75rem; color: #555; }
             .download-note { font-size: 0.65rem; color: #FF69B4; background: #ffffff; border-radius: 8px; padding: 2px 4px; margin-top: 4px; word-break: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+            .download-warning-green { font-size: 0.55rem; line-height: 1.2; color: #2e7d32; background: rgba(46,125,50,0.1); border-radius: 6px; padding: 2px 3px; margin-top: 2px; display: inline-block; max-width: 100%; white-space: normal; word-break: break-word; }
+            .download-warning-red { font-size: 0.55rem; line-height: 1.2; color: #d32f2f; background: rgba(211,47,47,0.1); border-radius: 6px; padding: 2px 3px; margin-top: 2px; display: inline-block; max-width: 100%; white-space: normal; word-break: break-word; }
         `;
         container.appendChild(style);
-        
         let title = document.createElement('h3'); title.textContent=`${name} - ${scheduleYear}年${scheduleMonth}月班表`; title.style.textAlign='center'; title.style.marginBottom='20px';
         container.appendChild(title);
-        
         let table = document.createElement('table'); table.className = 'download-table';
         let thead = document.createElement('thead'); let tr = document.createElement('tr');
         let daysHeader = (weekStartDay===0)?['週日','週一','週二','週三','週四','週五','週六']:['週一','週二','週三','週四','週五','週六','週日'];
         daysHeader.forEach(d=>{let th=document.createElement('th'); th.textContent=d; tr.appendChild(th);});
         thead.appendChild(tr); table.appendChild(thead);
-        
         let person = scheduleData.find(p=>p.name===name);
         let daysInMonth = new Date(scheduleYear, scheduleMonth, 0).getDate();
         let firstDay = new Date(scheduleYear, scheduleMonth-1, 1).getDay();
         let emptyBefore = (weekStartDay===0)?firstDay:(firstDay===0?6:firstDay-1);
         let tbody = document.createElement('tbody');
-        
         for(let w=0; w<6; w++) {
             let row = document.createElement('tr');
             for(let c=0; c<7; c++) {
@@ -588,6 +691,19 @@
                             let noteDiv = document.createElement('div'); noteDiv.className='download-note'; noteDiv.textContent = sd.note;
                             td.appendChild(noteDiv);
                         }
+                        let nextDate = dateNum + 1;
+                        if (nextDate <= daysInMonth) {
+                            let nextShiftData = person.shifts[nextDate];
+                            if (nextShiftData && !holidayShifts.includes(nextShiftData.shift) && !holidayShifts.includes(sd.shift)) {
+                                let warningObj = getIntervalWarning(dateNum, sd.shift, nextDate, nextShiftData.shift, scheduleYear, scheduleMonth);
+                                if (warningObj) {
+                                    let warnSpan = document.createElement('div');
+                                    warnSpan.className = warningObj.cssClass === 'interval-warning-green' ? 'download-warning-green' : 'download-warning-red';
+                                    warnSpan.textContent = warningObj.text;
+                                    td.appendChild(warnSpan);
+                                }
+                            }
+                        }
                     }
                 } else {
                     td.className = 'empty-cell';
@@ -607,13 +723,11 @@
         }).catch(()=>{alert('下載失敗'); document.body.removeChild(container);});
     }
     
-    // 手機桌布生成 (備註背景白色，文字粉紅色)
     async function generateMobileWallpaper() {
         let name = document.getElementById('personSelect').value;
         if(!name) { alert('請先選擇人員'); return; }
         let person = scheduleData.find(p=>p.name===name);
         if(!person) return;
-        
         let savedColors = localStorage.getItem(STORAGE_KEYS.SHIFT_COLORS);
         if (savedColors) {
             try {
@@ -624,21 +738,17 @@
         for (let s of globalSpecialShifts) {
             if (!shiftColors[s]) shiftColors[s] = { ...SPECIAL_DEFAULT_COLOR };
         }
-        
         const noti = document.getElementById('downloadNotification');
         noti.classList.add('show');
-        
         const daysInMonth = new Date(scheduleYear, scheduleMonth, 0).getDate();
         const firstDay = new Date(scheduleYear, scheduleMonth-1, 1).getDay();
         let startEmpty = (weekStartDay === 0) ? firstDay : (firstDay === 0 ? 6 : firstDay - 1);
         const weekdaysShort = (weekStartDay===0) ? ['日','一','二','三','四','五','六'] : ['一','二','三','四','五','六','日'];
-        
         let workDays=0, holidayDays=0;
         for(let d=1;d<=daysInMonth;d++) {
             let sd = person.shifts[d];
             if(sd) holidayShifts.includes(sd.shift) ? holidayDays++ : workDays++;
         }
-        
         const cardWidth = 320;
         const cardDiv = document.createElement('div');
         cardDiv.style.width = `${cardWidth}px`;
@@ -648,14 +758,12 @@
         cardDiv.style.borderRadius = '32px';
         cardDiv.style.boxShadow = '0 10px 25px rgba(0,0,0,0.05)';
         cardDiv.style.color = '#1e2a3e';
-        
         const titleDiv = document.createElement('div');
         titleDiv.style.textAlign = 'center';
         titleDiv.style.marginBottom = '16px';
         titleDiv.innerHTML = `<div style="font-size: 22px; font-weight: 800; color: #4361ee;">${name}</div>
                               <div style="font-size: 13px; font-weight: 500; color: #6c757d; margin-top: 4px;">${scheduleYear}年 ${scheduleMonth}月 班表</div>`;
         cardDiv.appendChild(titleDiv);
-        
         const weekRow = document.createElement('div');
         weekRow.style.display = 'grid';
         weekRow.style.gridTemplateColumns = 'repeat(7, 1fr)';
@@ -674,13 +782,11 @@
             weekRow.appendChild(daySpan);
         });
         cardDiv.appendChild(weekRow);
-        
         const grid = document.createElement('div');
         grid.style.display = 'grid';
         grid.style.gridTemplateColumns = 'repeat(7, 1fr)';
         grid.style.gap = '4px';
         grid.style.marginBottom = '20px';
-        
         for(let i=0; i<startEmpty; i++) {
             const emptyCell = document.createElement('div');
             emptyCell.style.backgroundColor = '#fdf8e7';
@@ -690,28 +796,24 @@
             emptyCell.textContent = '';
             grid.appendChild(emptyCell);
         }
-        
         for(let d=1; d<=daysInMonth; d++) {
             const shiftData = person.shifts[d];
             const shiftCode = shiftData ? (shiftData.originalShift || shiftData.shift) : '';
             const isHoliday = shiftData ? holidayShifts.includes(shiftData.shift) : false;
             const bgColorObj = shiftData ? (shiftColors[shiftData.shift] || {r:240,g:240,b:240}) : {r:248,g:249,b:250};
             const bgRgba = `rgba(${bgColorObj.r}, ${bgColorObj.g}, ${bgColorObj.b}, 0.45)`;
-            
             const cell = document.createElement('div');
             cell.style.backgroundColor = bgRgba;
             cell.style.borderRadius = '10px';
             cell.style.padding = '6px 0 5px 0';
             cell.style.textAlign = 'center';
             cell.style.border = '1px solid rgba(0,0,0,0.02)';
-            
             const dateSpan = document.createElement('div');
             dateSpan.style.fontSize = '14px';
             dateSpan.style.fontWeight = '700';
             dateSpan.style.color = '#2c3e50';
             dateSpan.textContent = d;
             cell.appendChild(dateSpan);
-            
             if(shiftCode) {
                 const shiftSpan = document.createElement('div');
                 shiftSpan.style.fontSize = '10px';
@@ -732,7 +834,7 @@
                 if(shiftData.note && shiftData.note.trim() !== '') {
                     const noteSpan = document.createElement('div');
                     noteSpan.style.fontSize = '6px';
-                    noteSpan.style.color = '#FF69B4'; // 粉紅色
+                    noteSpan.style.color = '#FF69B4';
                     noteSpan.style.backgroundColor = '#ffffff';
                     noteSpan.style.borderRadius = '6px';
                     noteSpan.style.padding = '1px 2px';
@@ -742,6 +844,32 @@
                     let displayNote = shiftData.note.length > 12 ? shiftData.note.substring(0,12)+'…' : shiftData.note;
                     noteSpan.textContent = displayNote;
                     cell.appendChild(noteSpan);
+                }
+                let nextDate = d + 1;
+                if (nextDate <= daysInMonth) {
+                    let nextShiftData = person.shifts[nextDate];
+                    if (nextShiftData && !holidayShifts.includes(nextShiftData.shift) && !holidayShifts.includes(shiftCode)) {
+                        let warningObj = getIntervalWarning(d, shiftCode, nextDate, nextShiftData.shift, scheduleYear, scheduleMonth);
+                        if (warningObj) {
+                            const warnSpan = document.createElement('div');
+                            warnSpan.style.fontSize = '5px';
+                            warnSpan.style.lineHeight = '1.2';
+                            warnSpan.style.backgroundColor = 'rgba(0,0,0,0.05)';
+                            warnSpan.style.borderRadius = '6px';
+                            warnSpan.style.padding = '1px 2px';
+                            warnSpan.style.marginTop = '2px';
+                            warnSpan.style.whiteSpace = 'normal';
+                            warnSpan.style.wordBreak = 'break-word';
+                            warnSpan.style.maxWidth = '100%';
+                            warnSpan.textContent = warningObj.text;
+                            if (warningObj.cssClass === 'interval-warning-green') {
+                                warnSpan.style.color = '#2e7d32';
+                            } else {
+                                warnSpan.style.color = '#d32f2f';
+                            }
+                            cell.appendChild(warnSpan);
+                        }
+                    }
                 }
             } else {
                 const dashSpan = document.createElement('div');
@@ -754,7 +882,6 @@
             grid.appendChild(cell);
         }
         cardDiv.appendChild(grid);
-        
         const statsDiv = document.createElement('div');
         statsDiv.style.backgroundColor = '#f1f5fe';
         statsDiv.style.borderRadius = '16px';
@@ -769,7 +896,6 @@
             <div style="color:#4361ee;">📅 總日 ${workDays+holidayDays}天</div>
         `;
         cardDiv.appendChild(statsDiv);
-        
         const footerNote = document.createElement('div');
         footerNote.style.textAlign = 'center';
         footerNote.style.fontSize = '6px';
@@ -777,7 +903,6 @@
         footerNote.style.marginTop = '12px';
         footerNote.textContent = '班表小助手';
         cardDiv.appendChild(footerNote);
-        
         document.body.appendChild(cardDiv);
         let cardCanvas;
         try {
@@ -789,21 +914,18 @@
         } finally {
             document.body.removeChild(cardDiv);
         }
-        
         const wallpaperCanvas = document.createElement('canvas');
         wallpaperCanvas.width = 1080;
         wallpaperCanvas.height = 1920;
         const ctx = wallpaperCanvas.getContext('2d');
         ctx.fillStyle = '#fdf8e7';
         ctx.fillRect(0, 0, wallpaperCanvas.width, wallpaperCanvas.height);
-        
         const targetCardWidth = wallpaperCanvas.width * 0.70;
         const scale = targetCardWidth / cardCanvas.width;
         const targetCardHeight = cardCanvas.height * scale;
         const x = (wallpaperCanvas.width - targetCardWidth) / 2;
         const y = (wallpaperCanvas.height - targetCardHeight) / 2;
         ctx.drawImage(cardCanvas, 0, 0, cardCanvas.width, cardCanvas.height, x, y, targetCardWidth, targetCardHeight);
-        
         wallpaperCanvas.toBlob(blob => {
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -813,11 +935,9 @@
             URL.revokeObjectURL(url);
             noti.classList.remove('show');
         }, 'image/png');
-        
         noti.classList.remove('show');
     }
     
-    // 輔助函數
     function isValidPersonName(name) {
         if (!name || typeof name !== 'string') return false;
         let trimmed = name.trim();
@@ -945,9 +1065,30 @@
             let select = document.getElementById('weekStartDaySelect');
             if(select) select.value = 0;
         }
-        document.getElementById('selectFileBtn').onclick=()=>document.getElementById('fileInput').click();
-        document.getElementById('fileInput').onchange=e=>{ if(e.target.files[0]) handleFile(e.target.files[0]); e.target.value=''; };
-        document.getElementById('reuploadBtn').onclick=()=>document.getElementById('fileInput').click();
+        // 修復檔案上傳按鈕
+        const fileInput = document.getElementById('fileInput');
+        const selectBtn = document.getElementById('selectFileBtn');
+        const uploadArea = document.getElementById('uploadArea');
+        if (selectBtn) {
+            selectBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                fileInput.click();
+            });
+        }
+        if (uploadArea) {
+            uploadArea.addEventListener('click', (e) => {
+                if (e.target === uploadArea || e.target.closest('.upload-instruction') || e.target.closest('i') || e.target.closest('p')) {
+                    fileInput.click();
+                }
+            });
+        }
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                handleFile(e.target.files[0]);
+            }
+            e.target.value = '';
+        });
+        document.getElementById('reuploadBtn').onclick=()=>fileInput.click();
         document.getElementById('clearStorageBtn').onclick=()=>{ if(confirm('清除所有本地資料？')) clearLocalStorage(); };
         document.getElementById('copyPersonScheduleBtn').onclick=copyPersonScheduleToClipboard;
         document.getElementById('copyPersonScheduleBtn2').onclick=copyPersonScheduleToClipboard;
