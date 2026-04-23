@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>班表小助手 - 工時間隔提醒｜備註功能</title>
+    <title>班表小助手 - 智慧工時間隔提醒</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -34,7 +34,7 @@
         .day-cell.today { border: 2px solid #ff6b6b; background-color: #ffece5; }
         .day-date { font-size: 1.2rem; font-weight: 700; color: #333; margin-bottom: 4px; }
         .day-shift { font-size: 0.9rem; font-weight: 600; margin-bottom: 2px; word-break: break-word; }
-        .day-shift-time { font-size: 0.7rem; color: #666; margin-bottom: 2px; }
+        .day-shift-time { font-size: 0.7rem; color: #666; margin-bottom: 2px; white-space: normal; word-break: break-word; }
         .day-note { font-size: 0.6rem; color: #FF69B4; background: #ffffff; border-radius: 6px; padding: 1px 3px; margin-top: 2px; white-space: normal; word-break: break-word; overflow: hidden; max-height: 2.2em; line-height: 1.2; }
         .interval-warning-green, .interval-warning-red { font-size: 0.55rem; line-height: 1.2; background: rgba(0,0,0,0.05); border-radius: 6px; padding: 2px 3px; margin-top: 2px; white-space: normal; word-break: break-word; display: inline-block; max-width: 100%; }
         .interval-warning-green { color: #2e7d32; background: rgba(46,125,50,0.1); }
@@ -75,15 +75,15 @@
 </head>
 <body>
 <div class="container">
-    <div class="text-center mb-4"><h1 class="fw-bold text-primary"><i class="bi bi-calendar-check"></i> 班表小助手</h1><p class="text-muted">上傳Excel班表｜點擊修改班型｜自動檢測工時間隔</p></div>
+    <div class="text-center mb-4"><h1 class="fw-bold text-primary"><i class="bi bi-calendar-check"></i> 班表小助手</h1><p class="text-muted">上傳Excel班表｜點擊修改班型｜智慧工時間隔提醒</p></div>
     
     <div class="feature-note">
         <i class="bi bi-info-circle-fill text-warning"></i> <strong>功能說明：</strong><br>
         • <strong>班表統計</strong>：自動分類「上班班別」、「公司的假(R/Z/GBL)」、「自己的假(其餘休假)」，並以<strong class="text-success">綠線分隔</strong>，各分類後方顯示總天數。<br>
         • <strong>備註功能</strong>：點擊日期格子可新增備註（粉紅字白底），限制30字，即時顯示剩餘字數。<br>
         • <strong>工時間隔提醒</strong>：<br>
-          - <span class="text-success">綠色提示</span>：連續兩天班型相同，顯示「～ HH:MM 前需下班」，計算方式為當天正常下班+4小時。<br>
-          - <span class="text-danger">紅色提示</span>：連續兩天班型不同，顯示「～ MM/DD HH:MM 前須下班」，確保隔日上班前有11小時休息。<br>
+          - <span class="text-success">綠色提示</span>：表示最多加班4小時的提醒（相同班型，或不同班型但加班4小時後仍滿足隔日11小時間隔）。<br>
+          - <span class="text-danger">紅色提示</span>：表示若加班到上限（4小時）仍會導致隔日休息不足11小時，必須更早下班。<br>
         • <strong>手機桌布</strong>：一鍵下載1080x1920標準桌布，班表居中，四周米黃背景防裁切。<br>
         • <strong>顏色自訂</strong>：可修改各班型背景色，儲存後會套用於網頁、下載圖片及桌布。
     </div>
@@ -169,57 +169,69 @@
         return minutes;
     }
     
-    // 核心函數：返回警示物件 { text, class }
+    // 修正後的警示函數
     function getIntervalWarning(prevDate, prevShiftCode, nextDate, nextShiftCode, year, month) {
         if (!prevShiftCode || !nextShiftCode) return null;
         if (holidayShifts.includes(prevShiftCode) || holidayShifts.includes(nextShiftCode)) return null;
         
         const prevStart = getShiftTimeMinutes(prevShiftCode, 'start');
-        const prevEnd = getShiftTimeMinutes(prevShiftCode, 'end');
         const nextStart = getShiftTimeMinutes(nextShiftCode, 'start');
-        if (prevStart === null || prevEnd === null || nextStart === null) return null;
+        if (prevStart === null || nextStart === null) return null;
         
-        // 判斷班型是否相同（直接比較代碼）
+        // 計算加班4小時後的下班時間 (當天正常下班+4小時)
+        let normalEnd = prevStart + 8 * 60;
+        let maxEnd = normalEnd + 4 * 60;
+        
+        // 計算實際休息分鐘數 (從 maxEnd 到 nextStart)
+        let restMinutes = nextStart - maxEnd;
+        if (restMinutes < 0) restMinutes += 1440;
+        
         const isSameShift = (prevShiftCode === nextShiftCode);
-        
         let targetTime, targetDateObj, warningText, cssClass;
+        let useRed = false;
         
         if (isSameShift) {
-            // 相同班型：最多加班4小時，即正常下班時間（上班時間+8小時）+4小時
-            let normalEnd = prevStart + 8 * 60;
-            let maxEnd = normalEnd + 4 * 60;
+            // 相同班型：一律顯示綠色，最多加班4小時
             targetTime = maxEnd;
             targetDateObj = new Date(year, month-1, prevDate);
             if (targetTime >= 1440) {
                 targetTime -= 1440;
                 targetDateObj.setDate(targetDateObj.getDate() + 1);
             }
-            let targetHour = Math.floor(targetTime / 60);
-            let targetMin = targetTime % 60;
-            let targetDateStr = `${targetDateObj.getMonth()+1}/${targetDateObj.getDate()}`;
-            let timeStr = `${targetHour.toString().padStart(2,'0')}:${targetMin.toString().padStart(2,'0')}`;
-            // 移除「（最多加班4h）」文字
-            warningText = `～ ${targetDateStr} ${timeStr} 前需下班`;
             cssClass = 'interval-warning-green';
         } else {
-            // 不同班型：必須滿足11小時間隔
-            let requiredPrevEnd = nextStart - 11 * 60;
-            let targetDateOffset = 0;
-            if (requiredPrevEnd < 0) {
-                requiredPrevEnd += 1440;
-                targetDateOffset = -1;
+            // 不同班型：如果休息分鐘數 < 11*60，則需要紅色警示（最晚必須在下班時間為 nextStart - 11h）
+            if (restMinutes < 11 * 60) {
+                useRed = true;
+                let requiredPrevEnd = nextStart - 11 * 60;
+                let targetDateOffset = 0;
+                if (requiredPrevEnd < 0) {
+                    requiredPrevEnd += 1440;
+                    targetDateOffset = -1;
+                }
+                targetDateObj = new Date(year, month-1, nextDate);
+                if (targetDateOffset === -1) {
+                    targetDateObj.setDate(targetDateObj.getDate() - 1);
+                }
+                targetTime = requiredPrevEnd;
+                cssClass = 'interval-warning-red';
+            } else {
+                // 休息足夠，顯示綠色（最多加班4小時即可）
+                targetTime = maxEnd;
+                targetDateObj = new Date(year, month-1, prevDate);
+                if (targetTime >= 1440) {
+                    targetTime -= 1440;
+                    targetDateObj.setDate(targetDateObj.getDate() + 1);
+                }
+                cssClass = 'interval-warning-green';
             }
-            targetDateObj = new Date(year, month-1, nextDate);
-            if (targetDateOffset === -1) {
-                targetDateObj.setDate(targetDateObj.getDate() - 1);
-            }
-            let targetHour = Math.floor(requiredPrevEnd / 60) % 24;
-            let targetMin = requiredPrevEnd % 60;
-            let targetDateStr = `${targetDateObj.getMonth()+1}/${targetDateObj.getDate()}`;
-            let timeStr = `${targetHour.toString().padStart(2,'0')}:${targetMin.toString().padStart(2,'0')}`;
-            warningText = `～ ${targetDateStr} ${timeStr} 前須下班`;
-            cssClass = 'interval-warning-red';
         }
+        
+        let targetHour = Math.floor(targetTime / 60) % 24;
+        let targetMin = targetTime % 60;
+        let targetDateStr = `${targetDateObj.getMonth()+1}/${targetDateObj.getDate()}`;
+        let timeStr = `${targetHour.toString().padStart(2,'0')}:${targetMin.toString().padStart(2,'0')}`;
+        warningText = useRed ? `～ ${targetDateStr} ${timeStr} 前須下班` : `～ ${targetDateStr} ${timeStr} 前需下班`;
         
         return { text: warningText, cssClass: cssClass };
     }
@@ -650,8 +662,8 @@
             .download-table td.empty-cell { border: none; background-color: #fdf8e7; padding: 12px; }
             .download-date { font-weight: bold; font-size: 1.2rem; margin-bottom: 5px; }
             .download-shift { font-weight: 600; }
-            .download-time { font-size: 0.75rem; color: #555; }
-            .download-note { font-size: 0.65rem; color: #FF69B4; background: #ffffff; border-radius: 8px; padding: 2px 4px; margin-top: 4px; word-break: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+            .download-time { font-size: 0.7rem; color: #555; }
+            .download-note { font-size: 0.6rem; color: #FF69B4; background: #ffffff; border-radius: 8px; padding: 2px 4px; margin-top: 4px; word-break: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
             .download-warning-green { font-size: 0.55rem; line-height: 1.2; color: #2e7d32; background: rgba(46,125,50,0.1); border-radius: 6px; padding: 2px 3px; margin-top: 2px; display: inline-block; max-width: 100%; white-space: normal; word-break: break-word; }
             .download-warning-red { font-size: 0.55rem; line-height: 1.2; color: #d32f2f; background: rgba(211,47,47,0.1); border-radius: 6px; padding: 2px 3px; margin-top: 2px; display: inline-block; max-width: 100%; white-space: normal; word-break: break-word; }
         `;
@@ -824,11 +836,10 @@
                 cell.appendChild(shiftSpan);
                 if(shiftData && shiftDescriptions[shiftData.shift]) {
                     const timeSpan = document.createElement('div');
-                    timeSpan.style.fontSize = '7px';
+                    timeSpan.style.fontSize = '6px';
                     timeSpan.style.color = '#6c757d';
                     timeSpan.style.marginTop = '1px';
-                    let shortTime = shiftDescriptions[shiftData.shift].replace('~','').substring(0,5);
-                    timeSpan.textContent = shortTime;
+                    timeSpan.textContent = shiftDescriptions[shiftData.shift];
                     cell.appendChild(timeSpan);
                 }
                 if(shiftData.note && shiftData.note.trim() !== '') {
