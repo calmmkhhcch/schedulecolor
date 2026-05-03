@@ -85,7 +85,8 @@
           - <span class="text-success">綠色提示</span>：表示最多加班4小時的提醒（相同班型，或不同班型但加班4小時後仍滿足隔日11小時間隔）。<br>
           - <span class="text-danger">紅色提示</span>：表示若加班到上限（4小時）仍會導致隔日休息不足11小時，必須更早下班。<br>
         • <strong>手機桌布</strong>：一鍵下載1080x1920標準桌布，班表居中，四周米黃背景防裁切。<br>
-        • <strong>顏色自訂</strong>：可修改各班型背景色，儲存後會套用於網頁、下載圖片及桌布。
+        • <strong>顏色自訂</strong>：可修改各班型背景色，儲存後會套用於網頁、下載圖片及桌布。<br>
+        • <strong>本地儲存</strong>：所有班表、顏色設定、每週第一天選項都會自動儲存在瀏覽器中，下次開啟時自動還原。
     </div>
     
     <div class="card"><div class="card-body"><h5 class="card-title"><i class="bi bi-upload"></i> 上傳班表檔案</h5>
@@ -138,12 +139,14 @@
     const companyHolidays = ['R', 'Z', 'GBL'];
     const personalHolidays = ['L', 'A', '公', '福', '體檢'];
     
+    // 修改公假的預設顏色為粉紅色 RGB(255,192,203)
     const defaultShiftColors = {
         'K0':{r:255,g:255,b:102}, 'M':{r:255,g:255,b:102}, 'M1':{r:255,g:255,b:102}, 'M2':{r:255,g:255,b:102}, 'M3':{r:255,g:255,b:102},
         'D':{r:255,g:107,b:107}, 'D2':{r:255,g:107,b:107}, 'D4':{r:255,g:107,b:107}, 'D5':{r:255,g:107,b:107}, 'D6':{r:255,g:107,b:107},
         'K2':{r:153,g:153,b:255}, 'K5':{r:153,g:153,b:255}, 'K6':{r:153,g:153,b:255}, 'N':{r:153,g:153,b:255},
         'Z':{r:204,g:255,b:229}, 'R':{r:204,g:255,b:229}, 'GBL':{r:204,g:255,b:229}, 'L':{r:204,g:255,b:229},
-        'A':{r:204,g:255,b:229}, '公':{r:204,g:255,b:229}, '福':{r:204,g:255,b:229}, '體檢':{r:204,g:255,b:229}
+        'A':{r:204,g:255,b:229}, '公':{r:255,g:192,b:203},  // 公假改為粉紅色
+        '福':{r:204,g:255,b:229}, '體檢':{r:204,g:255,b:229}
     };
     const SPECIAL_DEFAULT_COLOR = { r: 255, g: 192, b: 203 };
     
@@ -153,7 +156,15 @@
     let isSummaryCollapsed = true;
     let globalSpecialShifts = new Set();
     
-    const STORAGE_KEYS = { SCHEDULE_DATA:'scheduleData_v4', ALL_DATES:'allDates_v4', FILE_NAME:'fileName_v4', TIMESTAMP:'ts_v4', SHIFT_COLORS:'shiftColors_v4', WEEK_START_DAY:'weekStartDay_v4', SPECIAL_SHIFTS:'specialShifts_v4' };
+    const STORAGE_KEYS = {
+        SCHEDULE_DATA: 'scheduleData_v5',
+        ALL_DATES: 'allDates_v5',
+        FILE_NAME: 'fileName_v5',
+        TIMESTAMP: 'ts_v5',
+        SHIFT_COLORS: 'shiftColors_v5',
+        WEEK_START_DAY: 'weekStartDay_v5',
+        SPECIAL_SHIFTS: 'specialShifts_v5'
+    };
 
     // ========== 輔助函數 ==========
     function getShiftTimeMinutes(shiftCode, type) {
@@ -178,11 +189,8 @@
         const nextStart = getShiftTimeMinutes(nextShiftCode, 'start');
         if (prevStart === null || nextStart === null) return null;
         
-        // 計算加班4小時後的下班時間 (當天正常下班+4小時)
         let normalEnd = prevStart + 8 * 60;
         let maxEnd = normalEnd + 4 * 60;
-        
-        // 計算實際休息分鐘數 (從 maxEnd 到 nextStart)
         let restMinutes = nextStart - maxEnd;
         if (restMinutes < 0) restMinutes += 1440;
         
@@ -191,7 +199,6 @@
         let useRed = false;
         
         if (isSameShift) {
-            // 相同班型：一律顯示綠色，最多加班4小時
             targetTime = maxEnd;
             targetDateObj = new Date(year, month-1, prevDate);
             if (targetTime >= 1440) {
@@ -200,7 +207,6 @@
             }
             cssClass = 'interval-warning-green';
         } else {
-            // 不同班型：如果休息分鐘數 < 11*60，則需要紅色警示（最晚必須在下班時間為 nextStart - 11h）
             if (restMinutes < 11 * 60) {
                 useRed = true;
                 let requiredPrevEnd = nextStart - 11 * 60;
@@ -216,7 +222,6 @@
                 targetTime = requiredPrevEnd;
                 cssClass = 'interval-warning-red';
             } else {
-                // 休息足夠，顯示綠色（最多加班4小時即可）
                 targetTime = maxEnd;
                 targetDateObj = new Date(year, month-1, prevDate);
                 if (targetTime >= 1440) {
@@ -277,7 +282,9 @@
         saveColorSettingsToLocal();
     }
     
-    function saveColorSettingsToLocal() { localStorage.setItem(STORAGE_KEYS.SHIFT_COLORS, JSON.stringify(shiftColors)); }
+    function saveColorSettingsToLocal() {
+        localStorage.setItem(STORAGE_KEYS.SHIFT_COLORS, JSON.stringify(shiftColors));
+    }
     
     function createColorSettingsForPerson(specialShiftsOfCurrentPerson) {
         const container = document.getElementById('colorSettingsContainer');
